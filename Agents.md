@@ -195,6 +195,13 @@ A "JKU Starter Set" can be composed by filtering for the `starter-set` tag acros
 Campus Clothing, JKU Merchandise, Electronics & Gadgets, and Textbooks & Stationery categories
 (~12 curated products).
 
+## Build agent authority
+
+The "build agent" orchestrates subagents and is explicitly permitted to read and
+update `Agents.md` (this file) and `Agents.todo.md` directly — e.g. to record
+decisions, adjust the contract, or track progress. Subagents must treat
+`Agents.md` as the binding contract and read it before working.
+
 ## Conventions
 
 - **Conventional Commits** (`feat:`, `fix:`, `test:`, `docs:`, `chore:`)

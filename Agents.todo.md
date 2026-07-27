@@ -9,21 +9,20 @@ subagents must read it first. Conventional commit after each wave.
 - [x] Write `Agents.md` (contract: stack, structure, API, types, /validate rules)
 - [x] Write `Agents.todo.md` (this file)
 - [x] Vouchers must NOT be queryable via API; only rate-limited `POST /validate`
-- [ ] Commit: `docs: add agent contract and build plan`
+- [x] Commit: `docs: add agent contract and build plan` ✓ a7e5e84
 
-## Wave 1 — Foundation (single subagent, blocking)
+## Wave 1 — Foundation (delegated, completed)
 
-- [ ] Scaffold: `package.json` (ESM, scripts per Agents.md), `tsconfig.json` (strict),
-      `.gitignore`, install deps (fastify, @fastify/swagger, @fastify/swagger-ui,
-      @fastify/rate-limit, zod; dev: typescript, tsx, vitest, @types/node)
-- [ ] `src/types.ts` — all domain + API types from Agents.md
-- [ ] `src/dataset.ts` — zod schemas mirroring types, `loadDataset(path)`,
-      lookup indexes (categoryById, productById, vendorById, warehouseById,
-      offerById → { offer, variant, product }, voucherByCode)
-- [ ] `data/dataset.json` — sample dataset per requirements in Agents.md
-- [ ] Commit: `feat: scaffold project, domain types, dataset loader and sample data`
+- [x] Scaffold: package.json (ESM), tsconfig.json (strict), .gitignore, npm install
+- [x] Upgrade ALL deps to latest: Fastify 5.10, zod 4.4, TypeScript 7, vitest 4, etc. ✓ a3f6a74
+- [x] `src/types.ts` — all domain + API types from Agents.md
+- [x] `src/dataset.ts` — zod 4 schemas, loadDataset(), 6 lookup indexes
+- [x] `data/dataset.json` — 201 products, 1765 offers (84% free shipping), JKU-Linz theme
+- [x] `scripts/generate-data.mjs` — dataset generator (do not hand-edit dataset.json)
+- [x] Modeled: per-vendor shipping, freeShippingThreshold, Warehouse.packageTax (AT €3)
+- [x] Commit: ✓ a7e5e84 (docs), a3f6a74 (chore: deps), c57db79 (feat: dataset+types)
 
-## Wave 2 — Parallel implementation (3 subagents)
+## Wave 2 — Parallel implementation (3 subagents, launching now)
 
 ### 2a — API + validate + OpenAPI
 
