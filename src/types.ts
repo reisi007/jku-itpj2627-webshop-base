@@ -29,6 +29,7 @@ export interface Offer {
   warehouseId: string;
   price: number;
   currency: "EUR";
+  /** per item, cents; 0 means free shipping */
   shippingCost: number;
   freeShippingThreshold?: number;
   deliveryDays: { min: number; max: number };
@@ -45,6 +46,8 @@ export interface Warehouse {
   id: string;
   name: string;
   country: string;
+  /** per-shipment tax in cents (e.g. €3 Paketsteuer for Austrian warehouses) */
+  packageTax?: number;
 }
 
 export interface Voucher {
@@ -101,11 +104,14 @@ export interface Shipment {
   items: ShipmentItem[];
   itemsSubtotal: number;
   shippingCost: number;
+  /** flat per-shipment tax for this shipment's warehouse (e.g. €3 Paketsteuer) */
+  packageTax: number;
   deliveryDays: { min: number; max: number };
 }
 
 export interface Totals {
   items: number;
+  /** sum over shipments of (shippingCost + packageTax) */
   shipping: number;
   discount: number;
   grand: number;

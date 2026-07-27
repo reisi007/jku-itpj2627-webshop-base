@@ -32,6 +32,7 @@ const warehouseSchema = z.object({
   id: z.string(),
   name: z.string(),
   country: z.string(),
+  packageTax: z.number().int().nonnegative().optional(),
 });
 
 const voucherSchema = z.object({
