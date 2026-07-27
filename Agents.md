@@ -204,9 +204,12 @@ decisions, adjust the contract, or track progress. Subagents must treat
 
 ## Subagent authority
 
-A subagent that validates (verifies) implementation work is allowed to spawn
-sub-subagents of its own to fix issues found during verification, without
-escalating back to the build agent. It must still report what was fixed.
+- A subagent that validates (verifies) implementation work is allowed to spawn
+  sub-subagents of its own to fix issues found during verification, without
+  escalating back to the build agent. It must still report what was fixed.
+- **The validation agent must be a different subagent than the implementation agent.**
+  Never validate your own work. The build agent delegates implementation and
+  verification to separate, independent subagents.
 
 ## Conventions
 

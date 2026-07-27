@@ -157,8 +157,13 @@ describe("routes", () => {
     const body = res.json();
     expect(Array.isArray(body)).toBe(true);
     expect(body.length).toBeGreaterThan(0);
-    for (const w of body) {
-      expect(w).toHaveProperty("packageTax");
+    const atWarehouses = body.filter((w: any) => w.country === "AT");
+    const nonAtWarehouses = body.filter((w: any) => w.country !== "AT");
+    for (const w of atWarehouses) {
+      expect(w.packageTax).toBe(300);
+    }
+    for (const w of nonAtWarehouses) {
+      expect(w.packageTax === undefined || w.packageTax === 0).toBe(true);
     }
   });
 

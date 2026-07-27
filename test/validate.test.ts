@@ -68,7 +68,7 @@ describe("validateCart", () => {
     expect(offer).not.toBeNull();
     const result = validateCart({
       items: [{ offerId: offer!.offerId, quantity: 2 }],
-    });
+    }, dataset);
     expect(result.valid).toBe(true);
     expect(result.issues).toHaveLength(0);
     expect(result.shipments.length).toBeGreaterThan(0);
@@ -79,7 +79,7 @@ describe("validateCart", () => {
   it("OFFER_NOT_FOUND: nonexistent offerId", () => {
     const result = validateCart({
       items: [{ offerId: "nonexistent-offer", quantity: 1 }],
-    });
+    }, dataset);
     expect(result.valid).toBe(false);
     expect(result.issues).toHaveLength(1);
     expect(result.issues[0].code).toBe("OFFER_NOT_FOUND");
@@ -91,25 +91,29 @@ describe("validateCart", () => {
     expect(offer).not.toBeNull();
     const result = validateCart({
       items: [{ offerId: offer!.offerId, quantity: 0 }],
-    });
+    }, dataset);
     expect(result.valid).toBe(false);
     expect(result.issues).toHaveLength(1);
     expect(result.issues[0].code).toBe("INVALID_QUANTITY");
   });
 
   it("INVALID_QUANTITY: quantity -1", () => {
+    const offer = findOffer((o) => o.stock > 0);
+    expect(offer).not.toBeNull();
     const result = validateCart({
-      items: [{ offerId: "any-id", quantity: -1 }],
-    });
+      items: [{ offerId: offer!.offerId, quantity: -1 }],
+    }, dataset);
     expect(result.valid).toBe(false);
     expect(result.issues).toHaveLength(1);
     expect(result.issues[0].code).toBe("INVALID_QUANTITY");
   });
 
   it("INVALID_QUANTITY: non-integer quantity", () => {
+    const offer = findOffer((o) => o.stock > 0);
+    expect(offer).not.toBeNull();
     const result = validateCart({
-      items: [{ offerId: "any-id", quantity: 1.5 }],
-    });
+      items: [{ offerId: offer!.offerId, quantity: 1.5 }],
+    }, dataset);
     expect(result.valid).toBe(false);
     expect(result.issues).toHaveLength(1);
     expect(result.issues[0].code).toBe("INVALID_QUANTITY");
@@ -120,7 +124,7 @@ describe("validateCart", () => {
     if (zeroOffer) {
       const result = validateCart({
         items: [{ offerId: zeroOffer.offerId, quantity: 1 }],
-      });
+      }, dataset);
       expect(result.valid).toBe(false);
       expect(result.issues).toHaveLength(1);
       expect(result.issues[0].code).toBe("OUT_OF_STOCK");
@@ -129,7 +133,7 @@ describe("validateCart", () => {
       expect(offer).not.toBeNull();
       const result = validateCart({
         items: [{ offerId: offer!.offerId, quantity: 999999 }],
-      });
+      }, dataset);
       expect(result.valid).toBe(false);
       expect(result.issues).toHaveLength(1);
       expect(result.issues[0].code).toBe("OUT_OF_STOCK");
@@ -158,7 +162,7 @@ describe("validateCart", () => {
         { offerId: offer1!.offerId, quantity: 1 },
         { offerId: offer2!.offerId, quantity: 1 },
       ],
-    });
+    }, dataset);
     expect(result.shipments.length).toBeGreaterThanOrEqual(2);
   });
 
@@ -172,7 +176,7 @@ describe("validateCart", () => {
     );
     const result = validateCart({
       items: [{ offerId: paid.offerId, quantity: qty }],
-    });
+    }, dataset);
     const shipment = result.shipments.find(
       (s) => s.warehouseId === paid.warehouseId && s.vendorId === paid.vendorId,
     );
@@ -188,7 +192,7 @@ describe("validateCart", () => {
     expect(offer).not.toBeNull();
     const result = validateCart({
       items: [{ offerId: offer!.offerId, quantity: 1 }],
-    });
+    }, dataset);
     expect(result.deliveryDays).not.toBeNull();
     for (const shipment of result.shipments) {
       expect(shipment.deliveryDays.min).toBeGreaterThanOrEqual(0);
@@ -227,7 +231,7 @@ describe("validateCart", () => {
           { offerId: atOffer.offerId, quantity: 1 },
           { offerId: nonAtOffer.offerId, quantity: 1 },
         ],
-      });
+      }, dataset);
       const atShipment = result.shipments.find(
         (s) => s.warehouseId === atOffer.warehouseId,
       );
@@ -248,7 +252,7 @@ describe("validateCart", () => {
     const result = validateCart({
       items: [{ offerId: offer!.offerId, quantity: 1 }],
       voucherCode: "WELCOME10",
-    });
+    }, dataset);
     expect(result.valid).toBe(true);
     const expectedDiscount = Math.round(
       (result.totals.items * 10) / 100,
@@ -262,7 +266,7 @@ describe("validateCart", () => {
     const result = validateCart({
       items: [{ offerId: cheap!.offerId, quantity: 1 }],
       voucherCode: "FLAT500",
-    });
+    }, dataset);
     const expected = Math.min(500, result.totals.items);
     expect(result.totals.discount).toBe(expected);
   });
@@ -301,7 +305,7 @@ describe("validateCart", () => {
           { offerId: otherOffer.offerId, quantity: 1 },
         ],
         voucherCode: "STUDENT20",
-      });
+      }, dataset);
       const campusProduct = dataset.products.find(
         (p) => p.id === campusOffer.productId,
       );
@@ -328,7 +332,7 @@ describe("validateCart", () => {
     const result = validateCart({
       items: [{ offerId: offer!.offerId, quantity: 1 }],
       voucherCode: "EXPIRED2024",
-    });
+    }, dataset);
     expect(result.valid).toBe(false);
     expect(
       result.issues.some((i) => i.code === "VOUCHER_EXPIRED"),
@@ -344,7 +348,7 @@ describe("validateCart", () => {
     const result = validateCart({
       items: [{ offerId: cheap!.offerId, quantity: 1 }],
       voucherCode: "MINORDER3000",
-    });
+    }, dataset);
     expect(result.valid).toBe(false);
     expect(
       result.issues.some(
@@ -360,7 +364,7 @@ describe("validateCart", () => {
     const result = validateCart({
       items: [{ offerId: offer!.offerId, quantity: 1 }],
       voucherCode: "NONEXISTENT",
-    });
+    }, dataset);
     expect(result.valid).toBe(false);
     expect(
       result.issues.some((i) => i.code === "VOUCHER_NOT_FOUND"),
@@ -374,7 +378,7 @@ describe("validateCart", () => {
     const result = validateCart({
       items: [{ offerId: cheap!.offerId, quantity: 1 }],
       voucherCode: "FLAT500",
-    });
+    }, dataset);
     expect(result.totals.discount).toBeLessThanOrEqual(
       result.totals.items,
     );
@@ -382,21 +386,23 @@ describe("validateCart", () => {
 
   it("mixed valid/invalid items: valid in shipments, invalid in issues", () => {
     const offer = findOffer((o) => o.stock > 10 && o.shippingCost === 0);
+    const invalidOffer = findOffer((o) => o.stock > 0 && o.offerId !== offer?.offerId);
     expect(offer).not.toBeNull();
+    expect(invalidOffer).not.toBeNull();
     const result = validateCart({
       items: [
         { offerId: offer!.offerId, quantity: 1 },
         { offerId: "nonexistent", quantity: 1 },
-        { offerId: "another-nonexistent", quantity: -1 },
+        { offerId: invalidOffer!.offerId, quantity: -1 },
       ],
-    });
+    }, dataset);
     expect(result.valid).toBe(false);
     expect(result.shipments.length).toBeGreaterThan(0);
     const allShipmentOfferIds = result.shipments.flatMap((s) =>
       s.items.map((i) => i.offerId),
     );
     expect(allShipmentOfferIds).not.toContain("nonexistent");
-    expect(allShipmentOfferIds).not.toContain("another-nonexistent");
+    expect(allShipmentOfferIds).not.toContain(invalidOffer!.offerId);
     expect(
       result.issues.some((i) => i.code === "OFFER_NOT_FOUND"),
     ).toBe(true);
