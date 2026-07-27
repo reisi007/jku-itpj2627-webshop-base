@@ -86,7 +86,7 @@ function generateOffer(vendorIdx, basePrice) {
     shippingCost,
     freeShippingThreshold: shippingCost > 0 ? price * 3 : undefined,
     deliveryDays: { min: randInt(1, 3), max: randInt(3, 12) },
-    stock: randInt(0, 500),
+    stock: Math.random() < 0.08 ? 0 : Math.random() < 0.12 ? randInt(1, 5) : randInt(0, 500),
   };
 }
 
@@ -155,39 +155,34 @@ const electronicsProducts = [
   { name: "Acer Swift 3 University Pack", brand: "Acer", desc: "14-inch ultrabook with AMD Ryzen 7, comes with pre-installed Office 365 for JKU students", basePrice: 84900, attrs: { cpu: "AMD Ryzen 7 7840U", display: "14\" FHD", weight: "1.4kg", battery: "12h", os: "Windows 11 Home" }, tags: ["student", "top-rated", "exclusive"] },
   { name: "iPad Air 11 with Apple Pencil", brand: "Apple", desc: "11-inch iPad Air with M2 chip and Apple Pencil Pro — digital note-taking essential for JKU lectures", basePrice: 84900, attrs: { cpu: "Apple M2", display: "11\" Liquid Retina", weight: "462g", battery: "10h", os: "iPadOS 18" }, tags: ["student", "new"] },
   { name: "Samsung Galaxy Tab S9 FE", brand: "Samsung", desc: "10.9-inch tablet with S Pen included, perfect for reading JKU textbooks and taking notes", basePrice: 54900, attrs: { cpu: "Exynos 1380", display: "10.9\" TFT", weight: "523g", battery: "12h", os: "Android 14" }, tags: ["student", "budget"] },
-  { name: "Kindle Paperwhite", brand: "Amazon", desc: "6.8-inch e-reader with warm light, waterproof — carry all your JKU textbooks in one lightweight device", basePrice: 14999, attrs: { display: "6.8\" E-Ink", weight: "205g", storage: "16GB", waterproof: true }, tags: ["student", "lightweight", "eco-friendly"] },
+  { name: "Kindle Paperwhite", brand: "Amazon", desc: "6.8-inch e-reader with warm light, waterproof — carry all your JKU textbooks in one lightweight device", basePrice: 19999, attrs: { display: "6.8\" E-Ink", weight: "205g", storage: "16GB", waterproof: true }, tags: ["student", "lightweight", "eco-friendly"] },
   { name: "Sony WH-1000XM5 Headphones", brand: "Sony", desc: "Industry-leading noise cancelling headphones for focused study sessions at the JKU library", basePrice: 34900, attrs: { type: "Over-Ear", connectivity: "Bluetooth 5.2", battery: "40h", color: "Black" }, tags: ["premium", "new", "wireless"] },
   { name: "Apple AirPods Pro 2", brand: "Apple", desc: "Active noise cancelling earbuds with USB-C, perfect for studying at JKU Learning Center", basePrice: 21900, attrs: { type: "In-Ear", connectivity: "Bluetooth 5.3", battery: "6h", color: "White" }, tags: ["premium", "wireless", "student"] },
-  { name: "Logitech MX Master 3S Mouse", brand: "Logitech", desc: "Premium wireless mouse with quiet clicks, ergonomic design for long coding sessions at JKU", basePrice: 9999, attrs: { connectivity: "Bluetooth/USB-C", dpi: "8000", battery: "70 days", color: "Graphite" }, tags: ["premium", "ergonomic", "professional"] },
-  { name: "Cherry MX Mechanical Keyboard", brand: "Logitech", desc: "Full-size mechanical keyboard with Cherry MX Red switches, ideal for JKU programming assignments", basePrice: 8999, attrs: { layout: "DE-ISO", switches: "Cherry MX Red", connectivity: "USB-C", color: "Black" }, tags: ["professional", "durable"] },
+  { name: "Logitech MX Master 3S Mouse", brand: "Logitech", desc: "Premium wireless mouse with quiet clicks, ergonomic design for long coding sessions at JKU", basePrice: 15999, attrs: { connectivity: "Bluetooth/USB-C", dpi: "8000", battery: "70 days", color: "Graphite" }, tags: ["premium", "ergonomic", "professional"] },
+  { name: "Cherry MX Mechanical Keyboard", brand: "Cherry", desc: "Full-size mechanical keyboard with Cherry MX Red switches, ideal for JKU programming assignments", basePrice: 15999, attrs: { layout: "DE-ISO", switches: "Cherry MX Red", connectivity: "USB-C", color: "Black" }, tags: ["professional", "durable"] },
   { name: "Samsung 27\" 4K Monitor", brand: "Samsung", desc: "27-inch 4K UHD monitor with USB-C hub, perfect dual-screen setup for JKU home office", basePrice: 35900, attrs: { size: "27\"", resolution: "4K UHD", panel: "IPS", connectivity: "USB-C/HDMI/DP" }, tags: ["professional", "premium"] },
-  { name: "Dell 24\" FHD Monitor", brand: "Dell", desc: "24-inch Full HD monitor with adjustable stand, great budget option for JKU students", basePrice: 15900, attrs: { size: "24\"", resolution: "FHD", panel: "IPS", connectivity: "HDMI/DP" }, tags: ["student", "budget"] },
-  { name: "Logitech C920s HD Pro Webcam", brand: "Logitech", desc: "Full HD 1080p webcam with privacy shutter, essential for JKU online lectures and exams", basePrice: 8999, attrs: { resolution: "1080p", fov: "78°", mic: "Stereo", connectivity: "USB-A" }, tags: ["student", "professional", "new"] },
-  { name: "Blue Yeti USB Microphone", brand: "Logitech", desc: "Professional USB condenser microphone for JKU podcast projects and group presentations", basePrice: 12999, attrs: { type: "Condenser", pattern: "Cardioid", connectivity: "USB-C", color: "Black" }, tags: ["professional", "premium"] },
-  { name: "Jabra Evolve2 50 Headset", brand: "Jabra", desc: "Professional UC headset with noise-cancelling microphone for JKU remote study groups", basePrice: 11999, attrs: { type: "Over-Ear", connectivity: "USB-A/USB-C", battery: "37h", color: "Black" }, tags: ["professional", "wireless"] },
-  { name: "Samsung T7 Portable SSD 1TB", brand: "Samsung", desc: "Compact 1TB external SSD with USB 3.2, 1050MB/s — backup all your JKU projects", basePrice: 12999, attrs: { capacity: "1TB", interface: "USB 3.2 Gen2", speed: "1050MB/s", waterproof: true }, tags: ["student", "durable", "lightweight"] },
+  { name: "Dell 24\" FHD Monitor", brand: "Dell", desc: "24-inch Full HD monitor with adjustable stand, great budget option for JKU students", basePrice: 16900, attrs: { size: "24\"", resolution: "FHD", panel: "IPS", connectivity: "HDMI/DP" }, tags: ["student", "budget"] },
+  { name: "Logitech C920s HD Pro Webcam", brand: "Logitech", desc: "Full HD 1080p webcam with privacy shutter, essential for JKU online lectures and exams", basePrice: 14999, attrs: { resolution: "1080p", fov: "78°", mic: "Stereo", connectivity: "USB-A" }, tags: ["student", "professional", "new"] },
+  { name: "Blue Yeti USB Microphone", brand: "Blue", desc: "Professional USB condenser microphone for JKU podcast projects and group presentations", basePrice: 15999, attrs: { type: "Condenser", pattern: "Cardioid", connectivity: "USB-C", color: "Black" }, tags: ["professional", "premium"] },
+  { name: "Jabra Evolve2 50 Headset", brand: "Jabra", desc: "Professional UC headset with noise-cancelling microphone for JKU remote study groups", basePrice: 14999, attrs: { type: "Over-Ear", connectivity: "USB-A/USB-C", battery: "37h", color: "Black" }, tags: ["professional", "wireless"] },
+  { name: "Samsung T7 Portable SSD 1TB", brand: "Samsung", desc: "Compact 1TB external SSD with USB 3.2, 1050MB/s — backup all your JKU projects", basePrice: 15999, attrs: { capacity: "1TB", interface: "USB 3.2 Gen2", speed: "1050MB/s", waterproof: true }, tags: ["student", "durable", "lightweight"] },
   { name: "SanDisk Extreme 2TB External SSD", brand: "SanDisk", desc: "Rugged 2TB portable SSD with IP65 rating, perfect for carrying JKU coursework safely", basePrice: 19999, attrs: { capacity: "2TB", interface: "USB 3.2 Gen2", speed: "1050MB/s", waterproof: true }, tags: ["professional", "durable"] },
-  { name: "Wacom Intuos Small Drawing Tablet", brand: "Wacom", desc: "Compact drawing tablet for JKU design courses and digital note-taking on diagrams", basePrice: 7999, attrs: { size: "Small", activeArea: "7.6\" x 4.7\"", connectivity: "USB", pressure: "4096" }, tags: ["student", "budget"] },
-  { name: "Anker Power Bank 20000mAh", brand: "Anker", desc: "High-capacity 20000mAh power bank with USB-C PD, charge your devices all day at JKU", basePrice: 3999, attrs: { capacity: "20000mAh", ports: "USB-C PD + USB-A", fastCharge: true, color: "Black" }, tags: ["student", "durable", "travel"] },
-  { name: "Anker USB-C Hub 7-in-1", brand: "Anker", desc: "Compact USB-C hub with HDMI 4K, SD card reader, and 100W PD passthrough for JKU laptops", basePrice: 3499, attrs: { ports: "HDMI/SD/microSD/USB-A x3/USB-C PD", color: "Space Gray" }, tags: ["student", "professional"] },
+  { name: "Wacom Intuos Small Drawing Tablet", brand: "Wacom", desc: "Compact drawing tablet for JKU design courses and digital note-taking on diagrams", basePrice: 14999, attrs: { size: "Small", activeArea: "7.6\" x 4.7\"", connectivity: "USB", pressure: "4096" }, tags: ["student", "budget"] },
   { name: "CalDigit TS4 Thunderbolt 4 Dock", brand: "CalDigit", desc: "18-port Thunderbolt 4 dock for JKU workstation setup — 98W charging, dual 6K displays", basePrice: 35999, attrs: { ports: "18x", charging: "98W", displays: "Dual 6K", speed: "40Gbps" }, tags: ["professional", "premium", "exclusive"] },
-  { name: "Satechi Aluminum Monitor Stand", brand: "Satechi", desc: "Elegant aluminum monitor stand with USB-C hub, declutter your JKU dorm desk", basePrice: 5999, attrs: { material: "Aluminum", ports: "USB-C x3", color: "Space Gray" }, tags: ["student", "premium"] },
   { name: "LG UltraFine 27\" 5K Display", brand: "LG", desc: "27-inch 5K IPS monitor with Thunderbolt 3, the ultimate display for JKU design students", basePrice: 129999, attrs: { size: "27\"", resolution: "5K", panel: "IPS", connectivity: "Thunderbolt 3 x2" }, tags: ["premium", "professional", "exclusive"] },
   { name: "Microsoft Surface Laptop 5", brand: "Microsoft", desc: "Sleek 15-inch touchscreen laptop with Intel Core i7, stylish choice for JKU business students", basePrice: 139900, attrs: { cpu: "Intel Core i7-1265U", display: "15\" PixelSense Touch", weight: "1.56kg", battery: "17h", os: "Windows 11 Home" }, tags: ["student", "premium"] },
   { name: "ASUS ZenBook 14 OLED", brand: "ASUS", desc: "14-inch OLED laptop with Intel Core i7, stunning visuals for JKU multimedia projects", basePrice: 119900, attrs: { cpu: "Intel Core i7-1360P", display: "14\" 2.8K OLED", weight: "1.39kg", battery: "13h", os: "Windows 11 Home" }, tags: ["student", "premium", "professional"] },
   { name: "Lenovo Legion 5 Gaming Laptop", brand: "Lenovo", desc: "15.6-inch gaming laptop with RTX 4060, for JKU game dev students and weekend gamers", basePrice: 139900, attrs: { cpu: "AMD Ryzen 7 7840H", display: "15.6\" QHD 165Hz", gpu: "RTX 4060", weight: "2.4kg", os: "Windows 11 Home" }, tags: ["gaming", "student", "professional"] },
   { name: "Framework Laptop 13 DIY Edition", brand: "Framework", desc: "Fully repairable 13.5-inch laptop — upgrade RAM/storage/battery yourself, perfect for JKU engineering students", basePrice: 104900, attrs: { cpu: "Intel Core i7-1360P", display: "13.5\" 3:2 QHD", weight: "1.3kg", battery: "11h", os: "Windows 11 / Linux" }, tags: ["eco-friendly", "student", "new", "exclusive"] },
-  { name: "Razer DeathAdder V3 Mouse", brand: "Razer", desc: "Ultralight 59g gaming mouse with 30K DPI sensor, for JKU esports club members", basePrice: 6999, attrs: { connectivity: "USB-C", dpi: "30000", weight: "59g", color: "Black" }, tags: ["gaming", "lightweight", "premium"] },
+  { name: "Razer DeathAdder V3 Mouse", brand: "Razer", desc: "Ultralight 59g gaming mouse with 30K DPI sensor, for JKU esports club members", basePrice: 14999, attrs: { connectivity: "USB-C", dpi: "30000", weight: "59g", color: "Black" }, tags: ["gaming", "lightweight", "premium"] },
   { name: "SteelSeries Apex Pro TKL Keyboard", brand: "SteelSeries", desc: "Tenkeyless mechanical keyboard with adjustable OmniPoint switches, for JKU esports and coding", basePrice: 17999, attrs: { layout: "TKL DE-ISO", switches: "OmniPoint Adjustable", connectivity: "USB-C", color: "Black" }, tags: ["gaming", "professional", "premium"] },
   { name: "LG Gram 17", brand: "LG", desc: "Ultralight 17-inch laptop weighing only 1.35kg, huge screen for JKU spreadsheet and coding work", basePrice: 149900, attrs: { cpu: "Intel Core i7-1360P", display: "17\" WQXGA", weight: "1.35kg", battery: "19h", os: "Windows 11 Home" }, tags: ["lightweight", "professional", "premium"] },
   { name: "MSI Prestige 14 Evo", brand: "MSI", desc: "14-inch creator laptop with Intel Core i7, perfect for JKU media informatics students", basePrice: 119900, attrs: { cpu: "Intel Core i7-13700H", display: "14\" QHD+", gpu: "Iris Xe", weight: "1.49kg", os: "Windows 11 Home" }, tags: ["student", "professional"] },
   { name: "Samsung 32\" Curved Monitor", brand: "Samsung", desc: "32-inch curved QHD monitor, immersive display for JKU programming and design work", basePrice: 29900, attrs: { size: "32\"", resolution: "QHD", curvature: "1000R", panel: "VA" }, tags: ["professional", "gaming"] },
-  { name: "TP-Link Archer AX72 WiFi 6 Router", brand: "TP-Link", desc: "AX5400 dual-band WiFi 6 router, ensure fast internet in your JKU dorm room", basePrice: 6999, attrs: { standard: "WiFi 6", speed: "AX5400", bands: "2.4GHz + 5GHz", ports: "Gigabit x4" }, tags: ["student", "new"] },
-  { name: "Google Chromecast with Google TV 4K", brand: "Google", desc: "Stream JKU lecture recordings and Netflix in 4K HDR on your dorm TV", basePrice: 5999, attrs: { resolution: "4K HDR", remote: "Voice Remote", os: "Google TV", connectivity: "HDMI" }, tags: ["student", "home"] },
-  { name: "Anker USB-C Cable 2m Braided", brand: "Anker", desc: "Durable braided USB-C to C cable with 100W PD charging for your JKU laptop and phone", basePrice: 1299, attrs: { length: "2m", charging: "100W", data: "10Gbps", color: "Black" }, tags: ["student", "durable"] },
-  { name: "Mophie 3-in-1 Wireless Charger", brand: "Mophie", desc: "Charge iPhone, Apple Watch and AirPods simultaneously at your JKU desk", basePrice: 12999, attrs: { type: "3-in-1 Pad", power: "15W", compatibility: "MagSafe", color: "White" }, tags: ["premium", "student"] },
-  { name: "BenQ ScreenBar Halo", brand: "BenQ", desc: "Monitor-mounted LED lamp with ambient light sensor, reduces eye strain during late JKU study sessions", basePrice: 12999, attrs: { type: "Monitor Bar", brightness: "LED", control: "Wireless Remote", color: "Black" }, tags: ["premium", "student", "ergonomic"] },
-  { name: "Twelve South BookBook Voltaire Case", brand: "Twelve South", desc: "Vintage book-style leather sleeve for MacBook, stylish protection for your JKU laptop", basePrice: 5999, attrs: { material: "Leather", fit: "13\" MacBook", color: "Vintage Brown" }, tags: ["premium", "student"] },
+  { name: "TP-Link Archer AX72 WiFi 6 Router", brand: "TP-Link", desc: "AX5400 dual-band WiFi 6 router, ensure fast internet in your JKU dorm room", basePrice: 14999, attrs: { standard: "WiFi 6", speed: "AX5400", bands: "2.4GHz + 5GHz", ports: "Gigabit x4" }, tags: ["student", "new"] },
+  { name: "Mophie 3-in-1 Wireless Charger", brand: "Mophie", desc: "Charge iPhone, Apple Watch and AirPods simultaneously at your JKU desk", basePrice: 14999, attrs: { type: "3-in-1 Pad", power: "15W", compatibility: "MagSafe", color: "White" }, tags: ["premium", "student"] },
+  { name: "BenQ ScreenBar Halo", brand: "BenQ", desc: "Monitor-mounted LED lamp with ambient light sensor, reduces eye strain during late JKU study sessions", basePrice: 14999, attrs: { type: "Monitor Bar", brightness: "LED", control: "Wireless Remote", color: "Black" }, tags: ["premium", "student", "ergonomic"] },
+  { name: "Twelve South BookBook Voltaire Case", brand: "Twelve South", desc: "Vintage book-style leather sleeve for MacBook, stylish protection for your JKU laptop", basePrice: 14999, attrs: { material: "Leather", fit: "13\" MacBook", color: "Vintage Brown" }, tags: ["premium", "student"] },
   { name: "Logitech StreamCam", brand: "Logitech", desc: "1080p 60fps webcam with auto-focus and vertical mount, for JKU content creators and streamers", basePrice: 14999, attrs: { resolution: "1080p 60fps", fov: "78°", mic: "Stereo", connectivity: "USB-C" }, tags: ["professional", "premium"] },
 ];
 
@@ -273,8 +268,8 @@ const jkuMerchProducts = [
 const clothingBrands = ["Patagonia", "The North Face", "Nike", "Adidas", "H&M", "Zara", "Uniqlo", "Levi's", "Mammut", "Columbia", "Jack Wolfskin", "Carhartt", "Superdry", "Tommy Hilfiger", "Calvin Klein"];
 
 const clothingProducts = [
-  { name: "Rain Jacket Campus Edition", brand: "The North Face", desc: "Waterproof rain jacket with taped seams, ideal for cycling to JKU campus", basePrice: 11999, attrs: { material: "DryVent 2L", waterproof: true, hood: true } },
-  { name: "Winter Down Jacket Insulated", brand: "Patagonia", desc: "Warm 700-fill down jacket for Linz winter commutes to JKU campus", basePrice: 19999, attrs: { material: "700-Fill Down", waterproof: false, hood: true } },
+  { name: "Rain Jacket Campus Edition", brand: "The North Face", desc: "Waterproof rain jacket with taped seams, ideal for cycling to JKU campus", basePrice: 9999, attrs: { material: "DryVent 2L", waterproof: true, hood: true } },
+  { name: "Winter Down Jacket Insulated", brand: "Patagonia", desc: "Warm 700-fill down jacket for Linz winter commutes to JKU campus", basePrice: 9999, attrs: { material: "700-Fill Down", waterproof: false, hood: true } },
   { name: "Campus Hoodie Essentials", brand: "Nike", desc: "Classic cotton hoodie for everyday JKU campus wear, comfortable and durable", basePrice: 5999, attrs: { material: "Cotton Fleece", fit: "Regular", color: "Grey" } },
   { name: "Slim Fit Chino Pants", brand: "Uniqlo", desc: "Stretch slim fit chinos, perfect for JKU presentations and everyday wear", basePrice: 3999, attrs: { material: "Cotton Blend", fit: "Slim", color: "Beige" } },
   { name: "Oxford Button-Down Shirt", brand: "Tommy Hilfiger", desc: "Classic Oxford shirt with button-down collar, smart-casual for JKU seminars", basePrice: 7999, attrs: { material: "100% Cotton", fit: "Regular", color: "Blue" } },
@@ -286,14 +281,14 @@ const clothingProducts = [
   { name: "Polo Shirt Classic Fit", brand: "Fred Perry", desc: "Classic pique polo shirt, smart casual for JKU group presentations", basePrice: 6999, attrs: { material: "Pique Cotton", fit: "Regular", color: "Navy" } },
   { name: "Chino Shorts Campus", brand: "Zara", desc: "Lightweight chino shorts for JKU summer semester and campus barbecues", basePrice: 2999, attrs: { material: "Cotton", fit: "Regular", color: "Khaki" } },
   { name: "Thermal Long Sleeve Base Layer", brand: "Uniqlo", desc: "Heattech thermal top for staying warm during JKU winter lectures", basePrice: 1999, attrs: { material: "HEATTECH", fit: "Slim", color: "Black" } },
-  { name: "Winter Parka Extreme", brand: "Mammut", desc: "Heavy-duty winter parka rated to -30°C, essential for the coldest Linz days", basePrice: 29999, attrs: { material: "Gore-Tex + Down", waterproof: true, hood: true } },
+  { name: "Winter Parka Extreme", brand: "Mammut", desc: "Heavy-duty winter parka rated to -30°C, essential for the coldest Linz days", basePrice: 9999, attrs: { material: "Gore-Tex + Down", waterproof: true, hood: true } },
   { name: "Casual Sneakers Court", brand: "Nike", desc: "Versatile low-top court sneakers for everyday JKU campus walking", basePrice: 8999, attrs: { type: "Low-Top", material: "Leather/Synthetic", color: "White" } },
-  { name: "Trail Running Shoes", brand: "Salomon", desc: "Grippy trail runners for JKU outdoor adventures in the Mühlviertel hills", basePrice: 11999, attrs: { type: "Trail", material: "Mesh/Gore-Tex", waterproof: true, color: "Black/Green" } },
-  { name: "Leather Chelsea Boots", brand: "Dr. Martens", desc: "Durable Chelsea boots with air-cushion sole, stylish for JKU campus life", basePrice: 15999, attrs: { type: "Chelsea Boot", material: "Leather", color: "Black" } },
+  { name: "Trail Running Shoes", brand: "Salomon", desc: "Grippy trail runners for JKU outdoor adventures in the Mühlviertel hills", basePrice: 9999, attrs: { type: "Trail", material: "Mesh/Gore-Tex", waterproof: true, color: "Black/Green" } },
+  { name: "Leather Chelsea Boots", brand: "Dr. Martens", desc: "Durable Chelsea boots with air-cushion sole, stylish for JKU campus life", basePrice: 9999, attrs: { type: "Chelsea Boot", material: "Leather", color: "Black" } },
   { name: "Leather Belt Classic", brand: "Calvin Klein", desc: "Genuine leather belt with brushed buckle, smart accessory for JKU presentations", basePrice: 4999, attrs: { material: "Leather", width: "3.5cm", color: "Black" } },
   { name: "Cashmere Blend Scarf", brand: "Uniqlo", desc: "Luxurious cashmere blend scarf for keeping warm between JKU campus buildings", basePrice: 3999, attrs: { material: "Cashmere Blend", size: "170x35cm", color: "Grey" } },
   { name: "Leather Gloves Touchscreen", brand: "Zara", desc: "Touchscreen-compatible leather gloves for JKU winter walks and phone use", basePrice: 2999, attrs: { material: "Leather", touchscreen: true, color: "Black" } },
-  { name: "Hiking Boots Waterproof", brand: "Columbia", desc: "Waterproof hiking boots with Omni-Grip, for weekend trips from Linz to the Alps", basePrice: 12999, attrs: { type: "Mid Hiking", material: "Leather/Mesh", waterproof: true, color: "Brown" } },
+  { name: "Hiking Boots Waterproof", brand: "Columbia", desc: "Waterproof hiking boots with Omni-Grip, for weekend trips from Linz to the Alps", basePrice: 9999, attrs: { type: "Mid Hiking", material: "Leather/Mesh", waterproof: true, color: "Brown" } },
   { name: "Down Vest Packable", brand: "Uniqlo", desc: "Ultralight down vest that packs into its own pocket, ideal for JKU commuters", basePrice: 3999, attrs: { material: "Down", packable: true, color: "Black" } },
   { name: "Corduroy Pants Slim Fit", brand: "Zara", desc: "Soft corduroy pants in wide wale, trendy for JKU autumn semester", basePrice: 4999, attrs: { material: "Cotton Corduroy", fit: "Slim", color: "Brown" } },
   { name: "Linen Shirt Short Sleeve", brand: "Zara", desc: "Breathable linen short sleeve shirt for JKU summer exam period", basePrice: 3499, attrs: { material: "100% Linen", fit: "Regular", color: "White" } },
@@ -301,7 +296,7 @@ const clothingProducts = [
   { name: "Rain Pants Over-Trousers", brand: "Mammut", desc: "Lightweight waterproof over-trousers for cycling to JKU in the rain", basePrice: 5999, attrs: { material: "Nylon 2L", waterproof: true, packable: true } },
   { name: "Summer Dress Casual", brand: "H&M", desc: "Lightweight sleeveless summer dress, perfect for warm JKU campus days", basePrice: 2999, attrs: { material: "Cotton/Viscose", length: "Knee", color: "Floral" } },
   { name: "Cardigan Wool Blend", brand: "Uniqlo", desc: "Soft wool blend cardigan with buttons, cozy for JKU library study sessions", basePrice: 4499, attrs: { material: "Wool Blend", fit: "Regular", color: "Camel" } },
-  { name: "Trench Coat Mid-Length", brand: "Zara", desc: "Classic double-breasted trench coat, smart outerwear for JKU spring semester", basePrice: 12999, attrs: { material: "Cotton Gabardine", waterproof: true, length: "Mid" } },
+  { name: "Trench Coat Mid-Length", brand: "Zara", desc: "Classic double-breasted trench coat, smart outerwear for JKU spring semester", basePrice: 9999, attrs: { material: "Cotton Gabardine", waterproof: true, length: "Mid" } },
   { name: "Fleece Jacket Half-Zip", brand: "Patagonia", desc: "Classic half-zip fleece, Patagonia's Synchilla fabric for warmth on JKU campus", basePrice: 8999, attrs: { material: "Synchilla Fleece", fit: "Regular", color: "Navy" } },
   { name: "Wool Trousers Tailored", brand: "Zara", desc: "Tailored wool-blend trousers for JKU job fairs and internship interviews", basePrice: 7999, attrs: { material: "Wool Blend", fit: "Tailored", color: "Charcoal" } },
   { name: "Vest Down Lightweight", brand: "Uniqlo", desc: "Ultra-lightweight down vest with 750-fill power, packable for JKU travel", basePrice: 4999, attrs: { material: "750-Fill Down", packable: true, color: "Navy" } },
@@ -380,6 +375,11 @@ const accessoryProducts = [
   { name: "Bicycle Pannier Waterproof Set", brand: "Ortlieb", desc: "Waterproof bike pannier set for JKU students who bike to campus in any weather", basePrice: 9999, attrs: { type: "Set (2 Panniers)", capacity: "20L each", waterproof: true, attachment: "QL2.1" } },
   { name: "Phone Wall Mount Bed", brand: "BESIGN", desc: "Articulating phone mount that attaches to your bed frame for JKU dorm Netflix", basePrice: 1499, attrs: { type: "Bed Mount", compatible: "All Phones", rotation: "360°" } },
   { name: "Vortex Keychain Multitool", brand: "SOG", desc: "Compact keychain multitool with 6 functions — handy for JKU dorm quick fixes", basePrice: 1999, attrs: { functions: 6, material: "Stainless Steel", length: "5.5cm", color: "Silver" } },
+  { name: "Anker Power Bank 20000mAh", brand: "Anker", desc: "High-capacity 20000mAh power bank with USB-C PD, charge your devices all day at JKU", basePrice: 4999, attrs: { capacity: "20000mAh", ports: "USB-C PD + USB-A", fastCharge: true, color: "Black" }, tags: ["student", "durable", "travel"] },
+  { name: "Anker USB-C Hub 7-in-1", brand: "Anker", desc: "Compact USB-C hub with HDMI 4K, SD card reader, and 100W PD passthrough for JKU laptops", basePrice: 5499, attrs: { ports: "HDMI/SD/microSD/USB-A x3/USB-C PD", color: "Space Gray" }, tags: ["student", "professional"] },
+  { name: "Satechi Aluminum Monitor Stand", brand: "Satechi", desc: "Elegant aluminum monitor stand with USB-C hub, declutter your JKU dorm desk", basePrice: 5999, attrs: { material: "Aluminum", ports: "USB-C x3", color: "Space Gray" }, tags: ["student", "premium"] },
+  { name: "Google Chromecast with Google TV 4K", brand: "Google", desc: "Stream JKU lecture recordings and Netflix in 4K HDR on your dorm TV", basePrice: 5999, attrs: { resolution: "4K HDR", remote: "Voice Remote", os: "Google TV", connectivity: "HDMI" }, tags: ["student", "home"] },
+  { name: "Anker USB-C Cable 2m Braided", brand: "Anker", desc: "Durable braided USB-C to C cable with 100W PD charging for your JKU laptop and phone", basePrice: 1499, attrs: { length: "2m", charging: "100W", data: "10Gbps", color: "Black" }, tags: ["student", "durable"] },
 ];
 
 // ── Build products from data ──────────────────────────────────────
@@ -611,23 +611,37 @@ function buildAllProducts() {
       attributes: p.attrs,
       variants: [],
     };
-    const sizes = ["S", "M", "L", "XL", "XXL"].slice(0, randInt(3, 5));
-    const colors = pick(clothingProducts).attrs.color ? [p.attrs.color] : ["Black", "White", "Navy"];
-    const colorPool = colors;
-    const vCount = randInt(3, Math.min(sizes.length * colorPool.length, 6));
-    const usedPairs = new Set();
-    for (let i = 0; i < vCount; i++) {
-      let size, color;
-      do { size = pick(sizes); color = pick(colorPool); } while (usedPairs.has(`${size}-${color}`));
-      usedPairs.add(`${size}-${color}`);
-      const extra = (size === "XL" || size === "XXL") ? 500 : 0;
-      prod.variants.push({
-        id: uid("var"),
-        sku: `${p.brand.slice(0, 3).toUpperCase()}-${p.name.replace(/[\s,']/g, "").slice(0, 10)}-${size}-${color}`,
-        name: `${size} / ${color}`,
-        attributes: { size, color },
-        offers: generateOffers(p.basePrice + extra),
-      });
+    const shoeNames = new Set(["Casual Sneakers Court", "Trail Running Shoes", "Leather Chelsea Boots", "Hiking Boots Waterproof"]);
+    if (shoeNames.has(p.name)) {
+      const euSizes = [38, 39, 40, 41, 42, 43, 44, 45, 46].slice(0, randInt(4, 7));
+      for (const euSize of euSizes) {
+        const extra = (euSize > 43) ? 500 : 0;
+        prod.variants.push({
+          id: uid("var"),
+          sku: `${p.brand.slice(0, 3).toUpperCase()}-${p.name.replace(/[\s,']/g, "").slice(0, 10)}-EU${euSize}`,
+          name: `EU ${euSize}`,
+          attributes: { size: euSize, color: p.attrs.color || "Black" },
+          offers: generateOffers(p.basePrice + extra),
+        });
+      }
+    } else {
+      const sizes = ["S", "M", "L", "XL", "XXL"].slice(0, randInt(3, 5));
+      const colors = p.attrs.color ? [p.attrs.color] : ["Black", "White", "Navy"];
+      const vCount = randInt(3, Math.min(sizes.length * colors.length, 6));
+      const usedPairs = new Set();
+      for (let i = 0; i < vCount; i++) {
+        let size, color;
+        do { size = pick(sizes); color = pick(colors); } while (usedPairs.has(`${size}-${color}`));
+        usedPairs.add(`${size}-${color}`);
+        const extra = (size === "XL" || size === "XXL") ? 500 : 0;
+        prod.variants.push({
+          id: uid("var"),
+          sku: `${p.brand.slice(0, 3).toUpperCase()}-${p.name.replace(/[\s,']/g, "").slice(0, 10)}-${size}-${color}`,
+          name: `${size} / ${color}`,
+          attributes: { size, color },
+          offers: generateOffers(p.basePrice + extra),
+        });
+      }
     }
     allProducts.push(prod);
   }

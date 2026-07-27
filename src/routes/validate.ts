@@ -17,7 +17,7 @@ export default async function (server: FastifyInstance): Promise<void> {
               required: ["offerId", "quantity"],
               properties: {
                 offerId: { type: "string" },
-                quantity: { type: "integer", minimum: 1 },
+                quantity: { type: "integer", minimum: 0 },
               },
             },
           },
