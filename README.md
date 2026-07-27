@@ -8,15 +8,25 @@ to check cart contents, compute shipments, and apply voucher codes.
 
 ## Quick Start
 
-**Prerequisites:** Node.js >= 20, pnpm.
+### Prerequisites
+
+- **Node.js** >= 20
+- **pnpm** (package manager)
+- **Git**
+
+### Installation
 
 ```bash
+git clone <repo-url>
+cd webshop-backend
 pnpm install
-pnpm dev          # starts server on http://localhost:3000 with file watching
 ```
 
-Environment variables: `PORT` (default 3000), `HOST` (default 0.0.0.0),
-`DATASET_PATH` (default `data/dataset.json`).
+### Usage
+
+```bash
+pnpm dev          # starts server on http://localhost:3000 with file watching
+```
 
 Swagger UI is available at [http://localhost:3000/docs](http://localhost:3000/docs).
 
@@ -57,8 +67,19 @@ The sample dataset (`data/dataset.json`) is JKU-Linz-themed: 201 products across
 including "Linz (JKU Campus)". 84% of offers have free shipping. A "JKU Starter
 Set" of ~12 curated products is tagged with `starter-set`.
 
+### Swapping datasets
+
 The dataset is swappable at runtime via the `DATASET_PATH` environment variable
-— no code changes needed. To regenerate the default dataset:
+— no code changes needed. For example:
+
+```bash
+DATASET_PATH=./my-custom-dataset.json pnpm dev
+```
+
+The dataset must conform to the same schema as the default (categories, products,
+vendors, warehouses, vouchers). Validation is handled by zod on load.
+
+To regenerate the default dataset:
 
 ```bash
 node scripts/generate-data.mjs
@@ -76,6 +97,7 @@ Never edit `data/dataset.json` by hand; always use the generator.
 | `pnpm test` | Run test suite (vitest) |
 | `pnpm openapi` | Regenerate `openapi.yaml` from server routes |
 | `pnpm client` | Run CLI demo client (requires running server) |
+| `node scripts/generate-data.mjs` | Regenerate the default dataset |
 
 Tests use `buildServer()` + `fastify.inject` — no live network port needed.
 After making changes, always run `pnpm typecheck && pnpm test`.
