@@ -7,7 +7,7 @@ No auth, no images, portable, swappable JSON dataset.
 
 ## Stack
 
-- Node.js >= 20, ESM (`"type": "module"`)
+- Node.js >= 20, pnpm, ESM (`"type": "module"`)
 - TypeScript (strict), Fastify 5
 - `@fastify/swagger` + `@fastify/swagger-ui` (docs at `/docs`, spec export to `openapi.yaml`)
 - `@fastify/rate-limit` (only on `POST /validate`: 5 requests / minute / IP)
@@ -18,12 +18,12 @@ No auth, no images, portable, swappable JSON dataset.
 
 | Command             | Purpose                                        |
 | ------------------- | ---------------------------------------------- |
-| `npm run dev`       | Start server with watch (tsx)                  |
-| `npm start`         | Start server (tsx, no watch)                   |
-| `npm run typecheck` | `tsc --noEmit`                                 |
-| `npm test`          | `vitest run`                                   |
-| `npm run openapi`   | Generate/refresh committed `openapi.yaml`      |
-| `npm run client`    | Run CLI demo client against a running server   |
+| `pnpm dev`          | Start server with watch (tsx)                  |
+| `pnpm start`        | Start server (tsx, no watch)                   |
+| `pnpm typecheck`    | `tsc --noEmit`                                 |
+| `pnpm test`         | `vitest run`                                   |
+| `pnpm openapi`      | Generate/refresh committed `openapi.yaml`      |
+| `pnpm client`       | Run CLI demo client against a running server   |
 
 Env vars: `PORT` (default 3000), `HOST` (default 0.0.0.0), `DATASET_PATH`
 (default `data/dataset.json` — swap datasets without code changes).
@@ -202,6 +202,12 @@ update `Agents.md` (this file) and `Agents.todo.md` directly — e.g. to record
 decisions, adjust the contract, or track progress. Subagents must treat
 `Agents.md` as the binding contract and read it before working.
 
+## Subagent authority
+
+A subagent that validates (verifies) implementation work is allowed to spawn
+sub-subagents of its own to fix issues found during verification, without
+escalating back to the build agent. It must still report what was fixed.
+
 ## Conventions
 
 - **Conventional Commits** (`feat:`, `fix:`, `test:`, `docs:`, `chore:`)
@@ -209,5 +215,5 @@ decisions, adjust the contract, or track progress. Subagents must treat
 - Keep `src/validate.ts` pure (data in → result out) so it is unit-testable
 - Tests use `buildServer()` + `fastify.inject`, never a live network port
   (except rate-limit test may use inject with distinct `remoteAddress`)
-- After changes always run: `npm run typecheck && npm test`
-- When API shape changes: regenerate `openapi.yaml` via `npm run openapi` and commit it
+- After changes always run: `pnpm typecheck && pnpm test`
+- When API shape changes: regenerate `openapi.yaml` via `pnpm openapi` and commit it

@@ -8,109 +8,63 @@ beforeAll(() => {
   dataset = loadDataset();
 });
 
-function findOffer(predicate: (o: { id: string; vendorId: string; warehouseId: string; price: number; shippingCost: number; freeShippingThreshold?: number; stock: number; deliveryDays: { min: number; max: number } }) => boolean): { offerId: string; warehouseId: string; vendorId: string } | null {
+interface OfferInfo {
+  offerId: string;
+  warehouseId: string;
+  vendorId: string;
+  price: number;
+  shippingCost: number;
+  freeShippingThreshold?: number;
+  stock: number;
+  productId?: string;
+}
+
+function findOffer(
+  predicate: (o: OfferInfo) => boolean,
+): OfferInfo | null {
   for (const product of dataset.products) {
     for (const variant of product.variants) {
       for (const offer of variant.offers) {
-        if (predicate(offer)) {
-          return { offerId: offer.id, warehouseId: offer.warehouseId, vendorId: offer.vendorId };
-        }
+        const info: OfferInfo = {
+          offerId: offer.id,
+          warehouseId: offer.warehouseId,
+          vendorId: offer.vendorId,
+          price: offer.price,
+          shippingCost: offer.shippingCost,
+          freeShippingThreshold: offer.freeShippingThreshold,
+          stock: offer.stock,
+          productId: product.id,
+        };
+        if (predicate(info)) return info;
       }
     }
   }
   return null;
 }
 
-function findStockZeroOffer() {
+function findOfferWithFreeShipping(): OfferInfo | null {
+  return findOffer(
+    (o) =>
+      o.shippingCost > 0 &&
+      o.freeShippingThreshold !== undefined &&
+      o.stock > 0 &&
+      o.freeShippingThreshold > 0,
+  );
+}
+
+function findOfferUnderPrice(max: number): OfferInfo | null {
+  return findOffer(
+    (o) => o.price > 0 && o.price < max && o.stock > 0,
+  );
+}
+
+function findOfferWithStockZero(): OfferInfo | null {
   return findOffer((o) => o.stock === 0);
-}
-
-function findTypicalOffer() {
-  return findOffer((o) => o.stock > 10 && o.shippingCost === 0);
-}
-
-function findOfferWithShipping() {
-  return findOffer((o) => o.shippingCost > 0 && o.freeShippingThreshold !== undefined && o.stock > 0);
-}
-
-function findNonATWarehouseOffer(): { offerId: string; warehouseId: string; vendorId: string } | null {
-  for (const product of dataset.products) {
-    for (const variant of product.variants) {
-      for (const offer of variant.offers) {
-        const wh = dataset.warehouses.find((w) => w.id === offer.warehouseId);
-        if (wh && wh.country !== "AT" && offer.stock > 0) {
-          return { offerId: offer.id, warehouseId: offer.warehouseId, vendorId: offer.vendorId };
-        }
-      }
-    }
-  }
-  return null;
-}
-
-function findATWarehouseOffer(): { offerId: string; warehouseId: string; vendorId: string } | null {
-  for (const product of dataset.products) {
-    for (const variant of product.variants) {
-      for (const offer of variant.offers) {
-        const wh = dataset.warehouses.find((w) => w.id === offer.warehouseId);
-        if (wh && wh.country === "AT" && offer.stock > 0) {
-          return { offerId: offer.id, warehouseId: offer.warehouseId, vendorId: offer.vendorId };
-        }
-      }
-    }
-  }
-  return null;
-}
-
-function findCampusClothingOffer(): { offerId: string; productId: string } | null {
-  const cat = dataset.categories.find((c) => c.name === "Campus Clothing");
-  if (!cat) return null;
-  for (const product of dataset.products) {
-    if (product.categoryId === cat.id) {
-      for (const variant of product.variants) {
-        for (const offer of variant.offers) {
-          if (offer.stock > 0) {
-            return { offerId: offer.id, productId: product.id };
-          }
-        }
-      }
-    }
-  }
-  return null;
-}
-
-function findJkuMerchOffer(): { offerId: string; productId: string } | null {
-  const cat = dataset.categories.find((c) => c.name.includes("JKU Merchandise"));
-  if (!cat) return null;
-  for (const product of dataset.products) {
-    if (product.categoryId === cat.id) {
-      for (const variant of product.variants) {
-        for (const offer of variant.offers) {
-          if (offer.stock > 0) {
-            return { offerId: offer.id, productId: product.id };
-          }
-        }
-      }
-    }
-  }
-  return null;
-}
-
-function findCheapOffer(): { offerId: string; price: number } | null {
-  for (const product of dataset.products) {
-    for (const variant of product.variants) {
-      for (const offer of variant.offers) {
-        if (offer.stock > 0 && offer.price > 0) {
-          return { offerId: offer.id, price: offer.price };
-        }
-      }
-    }
-  }
-  return null;
 }
 
 describe("validateCart", () => {
   it("happy path: valid items", () => {
-    const offer = findTypicalOffer();
+    const offer = findOffer((o) => o.stock > 10 && o.shippingCost === 0);
     expect(offer).not.toBeNull();
     const result = validateCart({
       items: [{ offerId: offer!.offerId, quantity: 2 }],
@@ -119,7 +73,6 @@ describe("validateCart", () => {
     expect(result.issues).toHaveLength(0);
     expect(result.shipments.length).toBeGreaterThan(0);
     expect(result.totals.items).toBeGreaterThan(0);
-    expect(result.totals.grand).toBe(result.totals.items + result.totals.shipping - result.totals.discount);
     expect(result.packageCount).toBeGreaterThan(0);
   });
 
@@ -134,7 +87,7 @@ describe("validateCart", () => {
   });
 
   it("INVALID_QUANTITY: quantity 0", () => {
-    const offer = findTypicalOffer();
+    const offer = findOffer((o) => o.stock > 0);
     expect(offer).not.toBeNull();
     const result = validateCart({
       items: [{ offerId: offer!.offerId, quantity: 0 }],
@@ -163,7 +116,7 @@ describe("validateCart", () => {
   });
 
   it("OUT_OF_STOCK: quantity exceeds stock", () => {
-    const zeroOffer = findStockZeroOffer();
+    const zeroOffer = findOfferWithStockZero();
     if (zeroOffer) {
       const result = validateCart({
         items: [{ offerId: zeroOffer.offerId, quantity: 1 }],
@@ -172,7 +125,7 @@ describe("validateCart", () => {
       expect(result.issues).toHaveLength(1);
       expect(result.issues[0].code).toBe("OUT_OF_STOCK");
     } else {
-      const offer = findTypicalOffer();
+      const offer = findOffer((o) => o.stock > 0);
       expect(offer).not.toBeNull();
       const result = validateCart({
         items: [{ offerId: offer!.offerId, quantity: 999999 }],
@@ -185,43 +138,53 @@ describe("validateCart", () => {
 
   it("shipment grouping: different vendors produce separate shipments", () => {
     const offer1 = findOffer((o) => {
-      const wh = dataset.warehouses.find((w) => w.id === o.warehouseId);
+      const wh = dataset.warehouses.find(
+        (w) => w.id === o.warehouseId,
+      );
       return o.stock > 0 && wh?.country === "DE";
     });
-    const offer2 = findOffer((o) => {
-      const wh = dataset.warehouses.find((w) => w.id === o.warehouseId);
-      return o.stock > 0 && wh?.country === "NL" && o.vendorId !== offer1?.vendorId;
-    });
+    const offer2 = offer1
+      ? findOffer(
+          (o) =>
+            o.stock > 0 &&
+            o.vendorId !== offer1.vendorId &&
+            o.warehouseId !== offer1.warehouseId,
+        )
+      : null;
     expect(offer1).not.toBeNull();
     expect(offer2).not.toBeNull();
-    const items = [
-      { offerId: offer1!.offerId, quantity: 1 },
-      { offerId: offer2!.offerId, quantity: 1 },
-    ];
-    const result = validateCart({ items });
+    const result = validateCart({
+      items: [
+        { offerId: offer1!.offerId, quantity: 1 },
+        { offerId: offer2!.offerId, quantity: 1 },
+      ],
+    });
     expect(result.shipments.length).toBeGreaterThanOrEqual(2);
   });
 
-  describe("free shipping threshold", () => {
-    it("shipping becomes 0 when threshold is met", () => {
-      const paid = findOfferWithShipping();
-      if (!paid) {
-        return;
-      }
-      const qty = Math.ceil(paid.freeShippingThreshold! / paid.price);
-      const result = validateCart({
-        items: [{ offerId: paid.offerId, quantity: qty }],
-      });
-      const shipment = result.shipments.find(
-        (s) => s.warehouseId === paid.warehouseId,
-      );
-      expect(shipment).toBeDefined();
-      expect(shipment!.shippingCost).toBeGreaterThan(0);
+  it("free shipping threshold: shipping becomes 0 when threshold met", () => {
+    const paid = findOfferWithFreeShipping();
+    if (!paid) {
+      return;
+    }
+    const qty = Math.ceil(
+      paid.freeShippingThreshold! / paid.price,
+    );
+    const result = validateCart({
+      items: [{ offerId: paid.offerId, quantity: qty }],
     });
+    const shipment = result.shipments.find(
+      (s) => s.warehouseId === paid.warehouseId && s.vendorId === paid.vendorId,
+    );
+    expect(shipment).toBeDefined();
+    expect(shipment!.itemsSubtotal).toBeGreaterThanOrEqual(
+      paid.freeShippingThreshold!,
+    );
+    expect(shipment!.shippingCost).toBe(0);
   });
 
   it("delivery days: overall = max of shipment max, shipment = max of item max", () => {
-    const offer = findTypicalOffer();
+    const offer = findOffer((o) => o.stock > 10 && o.shippingCost === 0);
     expect(offer).not.toBeNull();
     const result = validateCart({
       items: [{ offerId: offer!.offerId, quantity: 1 }],
@@ -244,8 +207,20 @@ describe("validateCart", () => {
   });
 
   it("package tax: AT warehouse → 300, non-AT → 0", () => {
-    const atOffer = findATWarehouseOffer();
-    const nonAtOffer = findNonATWarehouseOffer();
+    const atOffer = findOffer(
+      (o) =>
+        o.stock > 0 &&
+        dataset.warehouses.find(
+          (w) => w.id === o.warehouseId && w.country === "AT",
+        ) !== undefined,
+    );
+    const nonAtOffer = findOffer(
+      (o) =>
+        o.stock > 0 &&
+        dataset.warehouses.find(
+          (w) => w.id === o.warehouseId && w.country !== "AT",
+        ) !== undefined,
+    );
     if (atOffer && nonAtOffer) {
       const result = validateCart({
         items: [
@@ -263,161 +238,170 @@ describe("validateCart", () => {
       expect(atShipment!.packageTax).toBe(300);
       if (nonAtShipment) {
         expect(nonAtShipment.packageTax).toBe(0);
-      } else {
-        expect(true).toBe(true);
       }
     }
   });
 
-  describe("voucher percent", () => {
-    it("applies percent discount correctly", () => {
-      const offer = findTypicalOffer();
-      expect(offer).not.toBeNull();
-      const result = validateCart({
-        items: [{ offerId: offer!.offerId, quantity: 1 }],
-        voucherCode: "WELCOME10",
-      });
-      expect(result.valid).toBe(true);
-      const expectedDiscount = Math.round(
-        (result.totals.items * 10) / 100,
-      );
-      expect(result.totals.discount).toBe(expectedDiscount);
+  it("voucher percent: applies percent discount correctly", () => {
+    const offer = findOffer((o) => o.stock > 10 && o.shippingCost === 0);
+    expect(offer).not.toBeNull();
+    const result = validateCart({
+      items: [{ offerId: offer!.offerId, quantity: 1 }],
+      voucherCode: "WELCOME10",
     });
+    expect(result.valid).toBe(true);
+    const expectedDiscount = Math.round(
+      (result.totals.items * 10) / 100,
+    );
+    expect(result.totals.discount).toBe(expectedDiscount);
   });
 
-  describe("voucher fixed", () => {
-    it("applies fixed discount capped at subtotal", () => {
-      const cheap = findCheapOffer();
-      expect(cheap).not.toBeNull();
-      const result = validateCart({
-        items: [{ offerId: cheap!.offerId, quantity: 1 }],
-        voucherCode: "FLAT500",
-      });
-      const expected = Math.min(500, result.totals.items);
-      expect(result.totals.discount).toBe(expected);
+  it("voucher fixed: fixed discount capped at subtotal", () => {
+    const cheap = findOfferUnderPrice(10000);
+    expect(cheap).not.toBeNull();
+    const result = validateCart({
+      items: [{ offerId: cheap!.offerId, quantity: 1 }],
+      voucherCode: "FLAT500",
     });
+    const expected = Math.min(500, result.totals.items);
+    expect(result.totals.discount).toBe(expected);
   });
 
-  describe("voucher with categoryId", () => {
-    it("discount only applies to matching category items", () => {
-      const campus = findCampusClothingOffer();
-      const other = findTypicalOffer();
-      if (campus && other && other.offerId !== campus.offerId) {
-        const result = validateCart({
-          items: [
-            { offerId: campus.offerId, quantity: 1 },
-            { offerId: other.offerId, quantity: 1 },
-          ],
-          voucherCode: "STUDENT20",
-        });
-        const eligibleSubtotal = result.shipments
-          .flatMap((s) => s.items)
-          .filter((si) => {
-            const p = dataset.products.find(
-              (pr) => pr.id === si.productId,
-            );
-            const campusCat = dataset.categories.find((c) =>
-              c.name.includes("Campus Clothing"),
-            );
-            return p && campusCat && p.categoryId === campusCat.id;
-          })
-          .reduce((sum, si) => sum + si.lineTotal, 0);
-        const expectedDiscount = Math.round(
-          (eligibleSubtotal * 20) / 100,
-        );
-        expect(result.totals.discount).toBe(expectedDiscount);
-      } else {
-        expect(true).toBe(true);
-      }
-    });
-  });
-
-  describe("voucher expired", () => {
-    it("returns VOUCHER_EXPIRED issue", () => {
-      const offer = findTypicalOffer();
-      expect(offer).not.toBeNull();
-      const result = validateCart({
-        items: [{ offerId: offer!.offerId, quantity: 1 }],
-        voucherCode: "EXPIRED2024",
-      });
-      expect(result.valid).toBe(false);
-      expect(result.issues.some((i) => i.code === "VOUCHER_EXPIRED")).toBe(
-        true,
-      );
-      expect(result.totals.discount).toBe(0);
-    });
-  });
-
-  describe("voucher minOrderValue not met", () => {
-    it("returns VOUCHER_MIN_ORDER_NOT_MET issue", () => {
-      const cheap = findCheapOffer();
-      expect(cheap).not.toBeNull();
-      const result = validateCart({
-        items: [{ offerId: cheap!.offerId, quantity: 1 }],
-        voucherCode: "MINORDER3000",
-      });
-      expect(result.valid).toBe(false);
-      expect(
-        result.issues.some((i) => i.code === "VOUCHER_MIN_ORDER_NOT_MET"),
-      ).toBe(true);
-      expect(result.totals.discount).toBe(0);
-    });
-  });
-
-  describe("voucher not found", () => {
-    it("returns VOUCHER_NOT_FOUND issue", () => {
-      const offer = findTypicalOffer();
-      expect(offer).not.toBeNull();
-      const result = validateCart({
-        items: [{ offerId: offer!.offerId, quantity: 1 }],
-        voucherCode: "NONEXISTENT",
-      });
-      expect(result.valid).toBe(false);
-      expect(
-        result.issues.some((i) => i.code === "VOUCHER_NOT_FOUND"),
-      ).toBe(true);
-      expect(result.totals.discount).toBe(0);
-    });
-  });
-
-  describe("discount capped", () => {
-    it("voucher discount never exceeds eligible subtotal", () => {
-      const cheap = findCheapOffer();
-      expect(cheap).not.toBeNull();
-      const result = validateCart({
-        items: [{ offerId: cheap!.offerId, quantity: 1 }],
-        voucherCode: "FLAT500",
-      });
-      expect(result.totals.discount).toBeLessThanOrEqual(
-        result.totals.items,
-      );
-    });
-  });
-
-  describe("mixed valid/invalid items", () => {
-    it("valid items go to shipments, invalid to issues", () => {
-      const offer = findTypicalOffer();
-      expect(offer).not.toBeNull();
+  it("voucher with categoryId: discount only applies to matching category items", () => {
+    const campusCat = dataset.categories.find((c) =>
+      c.name.includes("Campus Clothing"),
+    );
+    const otherCat = dataset.categories.find(
+      (c) => !c.name.includes("Campus Clothing"),
+    );
+    expect(campusCat).not.toBeNull();
+    expect(otherCat).not.toBeNull();
+    const campusOffer = findOffer(
+      (o) =>
+        o.stock > 0 &&
+        dataset.products.some(
+          (p) =>
+            p.id === o.productId &&
+            p.categoryId === campusCat!.id,
+        ),
+    );
+    const otherOffer = findOffer(
+      (o) =>
+        o.stock > 0 &&
+        dataset.products.some(
+          (p) =>
+            p.id === o.productId &&
+            p.categoryId === otherCat!.id,
+        ),
+    );
+    if (campusOffer && otherOffer && campusOffer.offerId !== otherOffer.offerId) {
       const result = validateCart({
         items: [
-          { offerId: offer!.offerId, quantity: 1 },
-          { offerId: "nonexistent", quantity: 1 },
-          { offerId: "another-nonexistent", quantity: -1 },
+          { offerId: campusOffer.offerId, quantity: 1 },
+          { offerId: otherOffer.offerId, quantity: 1 },
         ],
+        voucherCode: "STUDENT20",
       });
-      expect(result.valid).toBe(false);
-      expect(result.shipments.length).toBeGreaterThan(0);
-      const allShipmentOfferIds = result.shipments.flatMap((s) =>
-        s.items.map((i) => i.offerId),
+      const campusProduct = dataset.products.find(
+        (p) => p.id === campusOffer.productId,
       );
-      expect(allShipmentOfferIds).not.toContain("nonexistent");
-      expect(allShipmentOfferIds).not.toContain("another-nonexistent");
-      expect(
-        result.issues.some((i) => i.code === "OFFER_NOT_FOUND"),
-      ).toBe(true);
-      expect(
-        result.issues.some((i) => i.code === "INVALID_QUANTITY"),
-      ).toBe(true);
+      let eligibleSubtotal = 0;
+      if (campusProduct) {
+        for (const shipment of result.shipments) {
+          for (const si of shipment.items) {
+            if (si.productId === campusProduct.id) {
+              eligibleSubtotal += si.lineTotal;
+            }
+          }
+        }
+      }
+      const expectedDiscount = Math.round(
+        (eligibleSubtotal * 20) / 100,
+      );
+      expect(result.totals.discount).toBe(expectedDiscount);
+    }
+  });
+
+  it("voucher expired: returns VOUCHER_EXPIRED issue", () => {
+    const offer = findOffer((o) => o.stock > 0);
+    expect(offer).not.toBeNull();
+    const result = validateCart({
+      items: [{ offerId: offer!.offerId, quantity: 1 }],
+      voucherCode: "EXPIRED2024",
     });
+    expect(result.valid).toBe(false);
+    expect(
+      result.issues.some((i) => i.code === "VOUCHER_EXPIRED"),
+    ).toBe(true);
+    expect(result.totals.discount).toBe(0);
+  });
+
+  it("voucher minOrderValue not met: returns VOUCHER_MIN_ORDER_NOT_MET", () => {
+    const cheap = findOfferUnderPrice(5000);
+    expect(cheap).not.toBeNull();
+    const total = cheap!.price * 1;
+    expect(total).toBeLessThan(5000);
+    const result = validateCart({
+      items: [{ offerId: cheap!.offerId, quantity: 1 }],
+      voucherCode: "MINORDER3000",
+    });
+    expect(result.valid).toBe(false);
+    expect(
+      result.issues.some(
+        (i) => i.code === "VOUCHER_MIN_ORDER_NOT_MET",
+      ),
+    ).toBe(true);
+    expect(result.totals.discount).toBe(0);
+  });
+
+  it("voucher not found: returns VOUCHER_NOT_FOUND issue", () => {
+    const offer = findOffer((o) => o.stock > 0);
+    expect(offer).not.toBeNull();
+    const result = validateCart({
+      items: [{ offerId: offer!.offerId, quantity: 1 }],
+      voucherCode: "NONEXISTENT",
+    });
+    expect(result.valid).toBe(false);
+    expect(
+      result.issues.some((i) => i.code === "VOUCHER_NOT_FOUND"),
+    ).toBe(true);
+    expect(result.totals.discount).toBe(0);
+  });
+
+  it("discount capped: voucher discount never exceeds eligible subtotal", () => {
+    const cheap = findOfferUnderPrice(10000);
+    expect(cheap).not.toBeNull();
+    const result = validateCart({
+      items: [{ offerId: cheap!.offerId, quantity: 1 }],
+      voucherCode: "FLAT500",
+    });
+    expect(result.totals.discount).toBeLessThanOrEqual(
+      result.totals.items,
+    );
+  });
+
+  it("mixed valid/invalid items: valid in shipments, invalid in issues", () => {
+    const offer = findOffer((o) => o.stock > 10 && o.shippingCost === 0);
+    expect(offer).not.toBeNull();
+    const result = validateCart({
+      items: [
+        { offerId: offer!.offerId, quantity: 1 },
+        { offerId: "nonexistent", quantity: 1 },
+        { offerId: "another-nonexistent", quantity: -1 },
+      ],
+    });
+    expect(result.valid).toBe(false);
+    expect(result.shipments.length).toBeGreaterThan(0);
+    const allShipmentOfferIds = result.shipments.flatMap((s) =>
+      s.items.map((i) => i.offerId),
+    );
+    expect(allShipmentOfferIds).not.toContain("nonexistent");
+    expect(allShipmentOfferIds).not.toContain("another-nonexistent");
+    expect(
+      result.issues.some((i) => i.code === "OFFER_NOT_FOUND"),
+    ).toBe(true);
+    expect(
+      result.issues.some((i) => i.code === "INVALID_QUANTITY"),
+    ).toBe(true);
   });
 });

@@ -1,4 +1,5 @@
 import type { Dataset, Offer, ValidateRequest, ValidateResponse, CartIssue, Shipment, ShipmentItem, Voucher } from "./types.js";
+import { getDataset } from "./dataset.js";
 
 interface OfferEntry {
   offer: Offer;
