@@ -1,0 +1,122 @@
+openapi: 3.0.3
+info:
+  title: Webshop Backend API
+  version: 1.0.0
+components:
+  schemas: {}
+paths:
+  /health:
+    get:
+      responses:
+        "200":
+          description: Default Response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+  /categories:
+    get:
+      responses:
+        "200":
+          description: Default Response
+  /categories/{id}/products:
+    get:
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /products:
+    get:
+      parameters:
+        - schema:
+            type: string
+          in: query
+          name: category
+          required: false
+        - schema:
+            type: string
+          in: query
+          name: q
+          required: false
+        - schema:
+            type: string
+          in: query
+          name: minPrice
+          required: false
+        - schema:
+            type: string
+          in: query
+          name: maxPrice
+          required: false
+      responses:
+        "200":
+          description: Default Response
+  /products/{id}:
+    get:
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /vendors:
+    get:
+      responses:
+        "200":
+          description: Default Response
+  /vendors/{id}:
+    get:
+      parameters:
+        - schema:
+            type: string
+          in: path
+          name: id
+          required: true
+      responses:
+        "200":
+          description: Default Response
+  /warehouses:
+    get:
+      responses:
+        "200":
+          description: Default Response
+  /validate:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - items
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required:
+                      - offerId
+                      - quantity
+                    properties:
+                      offerId:
+                        type: string
+                      quantity:
+                        type: integer
+                        minimum: 1
+                voucherCode:
+                  type: string
+      responses:
+        "200":
+          description: Default Response
