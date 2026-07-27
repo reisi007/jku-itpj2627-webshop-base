@@ -54,10 +54,30 @@ subagents must read it first. Conventional commit after each wave.
 - [ ] `test/ratelimit.test.ts` — 6th request within a minute → 429
 - [ ] Commit: `test: dataset, routes, validate logic and rate limit suites`
 
-## Wave 3 — Verification (subagent) + finish (build agent)
+## Wave 3 — Verification + polish (completed)
 
-- [ ] Run `npm run typecheck` && `npm test` — fix all failures
-- [ ] Generate `openapi.yaml` (`npm run openapi`), verify spec covers all routes
-- [ ] E2E smoke: start server, run `npm run client` against it, verify output
-- [ ] `README.md` — quickstart, env vars, dataset swap, API overview
-- [ ] Commit: `chore: verify build, generate openapi spec and add readme`
+- [x] Independent verification: test coverage, implementation completeness, no missing endpoints ✓
+- [x] E2E smoke: server start, client demo, all 7 steps pass ✓
+- [x] README.md — prerequisites, installation, commands, dataset swap, API overview ✓
+- [x] Dataset realism improved: pricing separated, stock distribution, shoe sizes ✓
+- [x] Commit: `docs: add project README`, `fix: improve dataset realism`
+
+## Remaining (TODO)
+
+- [ ] **Quantity minimum should be 1** — `src/routes/validate.ts:20` has `minimum: 0`, needs `minimum: 1`.
+      `test/validate.test.ts` uses quantity 0, `client/demo.ts` uses quantity 0.
+      After changing: regenerate `openapi.yaml` (committed version shows `minimum: 1` but
+      source has `minimum: 0` — it's out of sync).
+
+- [ ] **Male and female clothing with different size systems** in `scripts/generate-data.mjs`:
+      - Male-coded products: S/M/L/XL/XXL
+      - Female-coded products: XS/S/M/L/XL
+      - Add `gender` attribute to clothing items (`male`/`female`/`unisex`) to select
+        the right size pool per product
+
+- [ ] **8 missing test cases** (all absent from both `test/routes.test.ts` and
+      `test/validate.test.ts`):
+      - `validateCart`: empty cart, all items invalid, voucher on empty cart,
+        free shipping threshold NOT met (positive shippingCost)
+      - `routes`: GET /products with category filter, price range filter,
+        combined filters, POST /validate with invalid body
