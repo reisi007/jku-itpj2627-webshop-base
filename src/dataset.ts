@@ -56,22 +56,22 @@ const offerSchema = z.object({
   stock: z.number().int().min(0),
 });
 
-const variantSchema: z.ZodType<Variant> = z.object({
+const variantSchema = z.object({
   id: z.string(),
   sku: z.string(),
   name: z.string(),
-  attributes: z.record(z.union([z.string(), z.number(), z.boolean()])),
+  attributes: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
   offers: z.array(offerSchema),
 });
 
-const productSchema: z.ZodType<Product> = z.object({
+const productSchema = z.object({
   id: z.string(),
   categoryId: z.string(),
   name: z.string(),
   description: z.string(),
   brand: z.string().optional(),
   tags: z.array(z.string()),
-  attributes: z.record(z.union([z.string(), z.number(), z.boolean()])),
+  attributes: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])),
   variants: z.array(variantSchema),
 });
 
