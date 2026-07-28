@@ -14,6 +14,12 @@ export default async function (server: FastifyInstance): Promise<void> {
         },
         additionalProperties: true,
       },
+      response: {
+        200: {
+          type: "array",
+          items: { $ref: "Product" },
+        },
+      },
     },
   }, async (request) => {
     const { category, q, minPrice, maxPrice } = request.query;
@@ -53,6 +59,17 @@ export default async function (server: FastifyInstance): Promise<void> {
         required: ["id"],
         properties: {
           id: { type: "string" },
+        },
+      },
+      response: {
+        200: { $ref: "Product" },
+        404: {
+          type: "object",
+          properties: {
+            statusCode: { type: "number" },
+            error: { type: "string" },
+            message: { type: "string" },
+          },
         },
       },
     },

@@ -2,7 +2,16 @@ import type { FastifyInstance } from "fastify";
 import { getDataset, getVendorById } from "../dataset.js";
 
 export default async function (server: FastifyInstance): Promise<void> {
-  server.get("/vendors", async () => {
+  server.get("/vendors", {
+    schema: {
+      response: {
+        200: {
+          type: "array",
+          items: { $ref: "Vendor" },
+        },
+      },
+    },
+  }, async () => {
     return getDataset().vendors;
   });
 
@@ -13,6 +22,17 @@ export default async function (server: FastifyInstance): Promise<void> {
         required: ["id"],
         properties: {
           id: { type: "string" },
+        },
+      },
+      response: {
+        200: { $ref: "Vendor" },
+        404: {
+          type: "object",
+          properties: {
+            statusCode: { type: "number" },
+            error: { type: "string" },
+            message: { type: "string" },
+          },
         },
       },
     },

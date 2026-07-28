@@ -6,6 +6,7 @@ import { validateCart } from "../validate.js";
 export default async function (server: FastifyInstance): Promise<void> {
   server.post("/validate", {
     schema: {
+      description: "Validate cart items and voucher code. Rate-limited to 5 requests per minute per IP.",
       body: {
         type: "object",
         required: ["items"],
@@ -22,6 +23,18 @@ export default async function (server: FastifyInstance): Promise<void> {
             },
           },
           voucherCode: { type: "string" },
+        },
+      },
+      response: {
+        200: { $ref: "ValidateResponse" },
+        429: {
+          description: "Rate limit exceeded. Maximum 5 requests per minute per IP.",
+          type: "object",
+          properties: {
+            statusCode: { type: "number" },
+            error: { type: "string" },
+            message: { type: "string" },
+          },
         },
       },
     },
