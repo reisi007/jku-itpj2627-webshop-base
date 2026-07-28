@@ -60,6 +60,29 @@ different goals (cheapest, fastest, fewest packages).
 
 Rate-limited to **5 requests per minute per IP**. Returns 429 on overuse.
 
+## CLI Demo Client
+
+The demo client (`client/demo.ts`) showcases the full API capabilities in a
+7-step walkthrough. Start the server first, then run the client:
+
+```bash
+pnpm dev              # terminal 1 — start server
+pnpm client           # terminal 2 — run demo
+```
+
+The client demonstrates:
+
+1. **List categories** — browse the 6 JKU product categories
+2. **Search products** — full-text search across name, description, brand, tags
+3. **Product details** — variants with offers from multiple vendors
+4. **Offer comparison** — cheapest vs fastest vs fewest packages for one variant
+5. **Cart validation with errors** — OFFER_NOT_FOUND and INVALID_QUANTITY issues
+6. **Voucher discount** — apply WELCOME10 for 10% off, see updated totals
+7. **Expired voucher** — VOUCHER_EXPIRED error from EXPIRED2024
+
+The client uses plain `fetch` (no dependencies) and can be used as a reference
+for building AI tool-calling integrations.
+
 ## Dataset
 
 The sample dataset (`data/dataset.json`) is JKU-Linz-themed: 201 products across
