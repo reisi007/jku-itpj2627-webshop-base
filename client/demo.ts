@@ -224,10 +224,108 @@ async function step5() {
 }
 
 // ---------------------------------------------------------------------------
-// Step 6 – Validate with valid voucher WELCOME10
+// Step 6 – Successful cart validation (no voucher)
 // ---------------------------------------------------------------------------
 async function step6() {
-  heading('6. Validate with Voucher — POST /validate (voucherCode: "WELCOME10")');
+  heading("6. Successful Cart Validation — POST /validate (no voucher)");
+  try {
+    const products = (await getJSON("/products?q=ThinkPad+X1+Carbon")) as {
+      id: string; name: string;
+      variants: {
+        id: string; name: string;
+        offers: {
+          id: string; vendorId: string; warehouseId: string;
+          price: number; shippingCost: number;
+          freeShippingThreshold?: number;
+          deliveryDays: { min: number; max: number }; stock: string;
+        }[];
+      }[];
+    }[];
+    const tp = products[0];
+    if (!tp) { console.log("  SKIP (ThinkPad not found)"); return; }
+
+    const variant = tp.variants.find((v) => {
+      const combos = new Set(v.offers.map((o) => `${o.vendorId}|${o.warehouseId}`));
+      return combos.size >= 2;
+    });
+    if (!variant) { console.log("  SKIP (no variant with multiple vendor+warehouse combos)"); return; }
+
+    const offer1 = variant.offers[0];
+    const offer2 = variant.offers.find(
+      (o) => o.vendorId !== offer1.vendorId || o.warehouseId !== offer1.warehouseId,
+    );
+    if (!offer2) { console.log("  SKIP (could not find 2 offers from different warehouses)"); return; }
+
+    const cart = { items: [{ offerId: offer1.id, quantity: 1 }, { offerId: offer2.id, quantity: 2 }] };
+
+    const data = (await postJSON("/validate", cart)) as {
+      valid: boolean;
+      issues: { code: string; message: string; offerId?: string }[];
+      shipments: {
+        vendorId: string; warehouseId: string;
+        items: {
+          offerId: string; productId: string; variantId: string;
+          productName: string; variantName: string;
+          quantity: number; unitPrice: number; lineTotal: number;
+        }[];
+        itemsSubtotal: number;
+        shippingCost: number;
+        packageTax: number;
+        deliveryDays: { min: number; max: number };
+      }[];
+      totals: { items: number; shipping: number; discount: number; grand: number };
+      deliveryDays: { min: number; max: number } | null;
+      packageCount: number;
+    };
+
+    const vendorNames = new Map<string, string>();
+    for (const s of data.shipments) {
+      if (!vendorNames.has(s.vendorId)) {
+        const v = (await getJSON(`/vendors/${s.vendorId}`)) as { name: string };
+        vendorNames.set(s.vendorId, v.name);
+      }
+    }
+    const allWarehouses = (await getJSON("/warehouses")) as { id: string; name: string }[];
+    const warehouseNames = new Map(allWarehouses.map((w) => [w.id, w.name]));
+
+    console.log(`  valid: ${data.valid}`);
+    console.log(`  issues: ${JSON.stringify(data.issues)}`);
+    console.log(`  shipments (${data.shipments.length}):`);
+    for (let i = 0; i < data.shipments.length; i++) {
+      const s = data.shipments[i];
+      const vName = vendorNames.get(s.vendorId) ?? s.vendorId;
+      const wName = warehouseNames.get(s.warehouseId) ?? s.warehouseId;
+      console.log(`\n  ── Shipment #${i + 1} ──`);
+      console.log(`     Vendor:         ${vName}`);
+      console.log(`     Warehouse:      ${wName}`);
+      console.log(`     Items:`);
+      for (const item of s.items) {
+        console.log(`       - ${item.productName} — ${item.variantName}`);
+        console.log(`         qty ${item.quantity} × ${formatCents(item.unitPrice)} = ${formatCents(item.lineTotal)}`);
+      }
+      console.log(`     Items Subtotal: ${formatCents(s.itemsSubtotal)}`);
+      const shipNote = s.shippingCost === 0 ? " (free)" : "";
+      console.log(`     Shipping Cost:  ${formatCents(s.shippingCost)}${shipNote}`);
+      console.log(`     Package Tax:    ${formatCents(s.packageTax)}`);
+      console.log(`     Delivery Days:  ${s.deliveryDays.min}–${s.deliveryDays.max}`);
+    }
+    console.log(`\n  totals:`);
+    console.log(`    items:    ${formatCents(data.totals.items)}`);
+    console.log(`    shipping: ${formatCents(data.totals.shipping)}`);
+    console.log(`    discount: ${formatCents(data.totals.discount)}`);
+    console.log(`    grand:    ${formatCents(data.totals.grand)}`);
+    console.log(`  deliveryDays:   ${data.deliveryDays?.min}–${data.deliveryDays?.max} days`);
+    console.log(`  packageCount:   ${data.packageCount}`);
+  } catch (err: unknown) {
+    console.log(`  ERROR: ${err instanceof Error ? err.message : String(err)}`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Step 7 – Validate with valid voucher WELCOME10
+// ---------------------------------------------------------------------------
+async function step7() {
+  heading('7. Validate with Voucher — POST /validate (voucherCode: "WELCOME10")');
   try {
     const cart = {
       items: [
@@ -251,10 +349,10 @@ async function step6() {
 }
 
 // ---------------------------------------------------------------------------
-// Step 7 – Validate with expired voucher EXPIRED2024
+// Step 8 – Validate with expired voucher EXPIRED2024
 // ---------------------------------------------------------------------------
-async function step7() {
-  heading('7. Validate with Expired Voucher — POST /validate (voucherCode: "EXPIRED2024")');
+async function step8() {
+  heading('8. Validate with Expired Voucher — POST /validate (voucherCode: "EXPIRED2024")');
   try {
     const cart = {
       items: [
@@ -293,6 +391,7 @@ async function main() {
   await step5();
   await step6();
   await step7();
+  await step8();
 
   heading("Done");
 }
