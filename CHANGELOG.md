@@ -20,8 +20,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CLI demo client (`client/demo.ts`) — 7-step showcase of API capabilities
 - Build agent authority documented in Agents.md
 - Subagent authority: verification subagents may spawn fix subagents
+- 37 vitest tests covering dataset integrity, routes, validation logic, and rate limiting
+- README with installation prerequisites, commands, and dataset swap instructions
+- 8 additional test cases (empty cart, filters, invalid body, voucher edge cases) — 43 total
 
 ### Changed
 
 - Migrated from npm to pnpm as package manager
 - Upgraded all dependencies to latest: Fastify 5.10, zod 4.4, TypeScript 7, vitest 4
+- Improved dataset realism: pricing separated (clothing ≤€111, electronics ≥€229), stock distribution, shoe EU sizes, JKU-themed brand names
+- Quantity minimum raised from 0 to 1 (Fastify schema + validate logic)
+- Stock field changed from numeric to `StockLevel` enum (`NO` | `LITTLE` | `ALOT`)
+- Clothing products now have `gender` attribute (`male` | `female` | `unisex`) with gender-specific size systems
+- Regenerated openapi.yaml with stock enum, quantity min 1, rate-limit docs
