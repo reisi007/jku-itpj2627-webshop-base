@@ -1,4 +1,4 @@
-import type { Dataset, Offer, ValidateRequest, ValidateResponse, CartIssue, Shipment, ShipmentItem, Voucher } from "./types.js";
+import type { Dataset, Offer, StockLevel, ValidateRequest, ValidateResponse, CartIssue, Shipment, ShipmentItem, Voucher } from "./types.js";
 import { getDataset } from "./dataset.js";
 
 interface OfferEntry {
@@ -7,6 +7,12 @@ interface OfferEntry {
   variantId: string;
   productName: string;
   variantName: string;
+}
+
+function stockAvailable(level: StockLevel): number {
+  if (level === "NO") return 0;
+  if (level === "LITTLE") return 10;
+  return 9999;
 }
 
 function buildOfferMap(dataset: Dataset): Map<string, OfferEntry> {
@@ -45,7 +51,7 @@ export function validateCart(request: ValidateRequest, dataset: Dataset): Valida
       continue;
     }
 
-    if (item.quantity > entry.offer.stock) {
+    if (item.quantity > stockAvailable(entry.offer.stock)) {
       issues.push({ code: "OUT_OF_STOCK", message: `Insufficient stock for offer ${item.offerId}: requested ${item.quantity}, available ${entry.offer.stock}`, offerId: item.offerId });
       continue;
     }

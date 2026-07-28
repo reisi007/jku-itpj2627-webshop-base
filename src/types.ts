@@ -23,6 +23,8 @@ export interface Variant {
   offers: Offer[];
 }
 
+export type StockLevel = "NO" | "LITTLE" | "ALOT";
+
 export interface Offer {
   id: string;
   vendorId: string;
@@ -33,7 +35,7 @@ export interface Offer {
   shippingCost: number;
   freeShippingThreshold?: number;
   deliveryDays: { min: number; max: number };
-  stock: number;
+  stock: StockLevel;
 }
 
 export interface Vendor {

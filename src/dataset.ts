@@ -9,6 +9,7 @@ import type {
   Warehouse,
   Voucher,
   Dataset,
+  StockLevel,
 } from "./types.js";
 
 const deliveryDaysSchema = z.object({
@@ -54,7 +55,7 @@ const offerSchema = z.object({
   shippingCost: z.number().int(),
   freeShippingThreshold: z.number().int().optional(),
   deliveryDays: deliveryDaysSchema,
-  stock: z.number().int().min(0),
+  stock: z.enum(["NO", "LITTLE", "ALOT"]),
 });
 
 const variantSchema = z.object({

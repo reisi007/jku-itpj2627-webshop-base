@@ -15,6 +15,18 @@ function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+const MALE_SIZES = ["S", "M", "L", "XL", "XXL"];
+const FEMALE_SIZES = ["XS", "S", "M", "L", "XL"];
+const UNISEX_SIZES = ["XS", "S", "M", "L", "XL", "XXL"];
+const SHOE_SIZES = [38, 39, 40, 41, 42, 43, 44, 45, 46];
+
+function pickGender() {
+  const r = Math.random();
+  if (r < 0.4) return "male";
+  if (r < 0.8) return "female";
+  return "unisex";
+}
+
 const categories = [
   { id: uid("cat"), name: "Electronics & Gadgets", description: "Laptops, tablets, headphones, USB hubs, power banks, monitors, webcams, keyboards, mice and other tech essentials for JKU students" },
   { id: uid("cat"), name: "Textbooks & Stationery", description: "Mathematics, computer science and engineering textbooks, notebooks, pens, planners, whiteboards, calculators and study supplies" },
@@ -86,7 +98,7 @@ function generateOffer(vendorIdx, basePrice) {
     shippingCost,
     freeShippingThreshold: shippingCost > 0 ? price * 3 : undefined,
     deliveryDays: { min: randInt(1, 3), max: randInt(3, 12) },
-    stock: Math.random() < 0.08 ? 0 : Math.random() < 0.12 ? randInt(1, 5) : randInt(0, 500),
+    stock: (() => { const s = Math.random() < 0.08 ? 0 : Math.random() < 0.12 ? randInt(1, 5) : randInt(0, 500); return s === 0 ? "NO" : s <= 10 ? "LITTLE" : "ALOT"; })(),
   };
 }
 
@@ -420,10 +432,10 @@ function laptopVariantConfigs(basePrice, configPool) {
   }));
 }
 
-function clothingVariantConfigs(basePrice) {
-  const sizes = ["S", "M", "L", "XL", "XXL"];
+function clothingVariantConfigs(basePrice, _catId, gender) {
+  const sizePool = gender === "male" ? MALE_SIZES : gender === "female" ? FEMALE_SIZES : UNISEX_SIZES;
   const colors = ["Black", "White", "Navy", "Grey", "Khaki"];
-  const selectedSizes = sizes.slice(0, randInt(3, 5));
+  const selectedSizes = sizePool.slice(0, randInt(3, 5));
   const selectedColors = colors.slice(0, randInt(2, 4));
   const count = randInt(3, Math.min(selectedSizes.length * selectedColors.length, 6));
   const result = [];
@@ -433,7 +445,7 @@ function clothingVariantConfigs(basePrice) {
     do { size = pick(selectedSizes); color = pick(selectedColors); } while (used.has(`${size}-${color}`));
     used.add(`${size}-${color}`);
     const extra = (size === "XL" || size === "XXL") ? 500 : 0;
-    result.push({ name: `${size} / ${color}`, attrs: { size, color }, basePrice: basePrice + extra, skuSuffix: `${size}-${color}` });
+    result.push({ name: `${size} / ${color}`, attrs: { size, color, gender }, basePrice: basePrice + extra, skuSuffix: `${size}-${color}` });
   }
   return result;
 }
@@ -601,31 +613,40 @@ function buildAllProducts() {
 
   // Campus Clothing
   for (const p of clothingProducts) {
+    const gender = pickGender();
+    let name = p.name;
+    const baseName = name
+      .replace(/^(Men's |Women's )/, "");
+    if (gender === "male") name = `Men's ${baseName}`;
+    else if (gender === "female") name = `Women's ${baseName}`;
+    else name = baseName;
+
     const prod = {
       id: uid("prd"),
       categoryId: clothingCatId,
-      name: p.name,
+      name,
       description: p.desc,
       brand: p.brand,
       tags: [...new Set([...randomTags(), ...(p.tags || [])])],
-      attributes: p.attrs,
+      attributes: { ...p.attrs, gender },
       variants: [],
     };
     const shoeNames = new Set(["Casual Sneakers Court", "Trail Running Shoes", "Leather Chelsea Boots", "Hiking Boots Waterproof"]);
     if (shoeNames.has(p.name)) {
-      const euSizes = [38, 39, 40, 41, 42, 43, 44, 45, 46].slice(0, randInt(4, 7));
+      const euSizes = SHOE_SIZES.slice(0, randInt(4, 7));
       for (const euSize of euSizes) {
         const extra = (euSize > 43) ? 500 : 0;
         prod.variants.push({
           id: uid("var"),
-          sku: `${p.brand.slice(0, 3).toUpperCase()}-${p.name.replace(/[\s,']/g, "").slice(0, 10)}-EU${euSize}`,
+          sku: `${p.brand.slice(0, 3).toUpperCase()}-${baseName.replace(/[\s,']/g, "").slice(0, 10)}-EU${euSize}`,
           name: `EU ${euSize}`,
-          attributes: { size: euSize, color: p.attrs.color || "Black" },
+          attributes: { size: euSize, color: p.attrs.color || "Black", gender },
           offers: generateOffers(p.basePrice + extra),
         });
       }
     } else {
-      const sizes = ["S", "M", "L", "XL", "XXL"].slice(0, randInt(3, 5));
+      const sizePool = gender === "male" ? MALE_SIZES : gender === "female" ? FEMALE_SIZES : UNISEX_SIZES;
+      const sizes = sizePool.slice(0, randInt(3, 5));
       const colors = p.attrs.color ? [p.attrs.color] : ["Black", "White", "Navy"];
       const vCount = randInt(3, Math.min(sizes.length * colors.length, 6));
       const usedPairs = new Set();
@@ -636,9 +657,9 @@ function buildAllProducts() {
         const extra = (size === "XL" || size === "XXL") ? 500 : 0;
         prod.variants.push({
           id: uid("var"),
-          sku: `${p.brand.slice(0, 3).toUpperCase()}-${p.name.replace(/[\s,']/g, "").slice(0, 10)}-${size}-${color}`,
+          sku: `${p.brand.slice(0, 3).toUpperCase()}-${baseName.replace(/[\s,']/g, "").slice(0, 10)}-${size}-${color}`,
           name: `${size} / ${color}`,
-          attributes: { size, color },
+          attributes: { size, color, gender },
           offers: generateOffers(p.basePrice + extra),
         });
       }
@@ -730,7 +751,7 @@ function addStarterSetTags(products) {
     "Campus Hoodie Essentials",
   ];
   for (const prod of products) {
-    if (starterSetNames.includes(prod.name)) {
+    if (starterSetNames.some(s => prod.name.endsWith(s))) {
       prod.tags = [...new Set([...prod.tags, "starter-set"])];
     }
   }

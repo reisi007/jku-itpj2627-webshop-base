@@ -82,13 +82,15 @@ interface Variant {
   offers: Offer[];
 }
 
+type StockLevel = "NO" | "LITTLE" | "ALOT";
+
 interface Offer {
   id: string; vendorId: string; warehouseId: string;
   price: number; currency: "EUR";
   shippingCost: number;              // per item, cents; 0 means free shipping
   freeShippingThreshold?: number;    // shipment item subtotal >= threshold → shipping 0
   deliveryDays: { min: number; max: number };
-  stock: number;
+  stock: StockLevel;
 }
 
 interface Vendor { id: string; name: string; rating: number /* 1..5 */ }

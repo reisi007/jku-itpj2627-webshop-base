@@ -91,7 +91,7 @@ async function step3(productId: string | undefined) {
           id: string; vendorId: string; warehouseId: string;
           price: number; shippingCost: number;
           freeShippingThreshold?: number;
-          deliveryDays: { min: number; max: number }; stock: number;
+          deliveryDays: { min: number; max: number }; stock: string;
         }[];
       }[];
     };
@@ -134,7 +134,7 @@ async function step4() {
           id: string; vendorId: string; warehouseId: string;
           price: number; shippingCost: number;
           freeShippingThreshold?: number;
-          deliveryDays: { min: number; max: number }; stock: number;
+          deliveryDays: { min: number; max: number }; stock: string;
         }[];
       }[];
     }[];
@@ -200,7 +200,7 @@ async function step5() {
       items: [
         { offerId: "off-00000000-0018-0000-000000000000", quantity: 1 },
         { offerId: "off-nonexistent", quantity: 1 },
-        { offerId: "off-00000000-0018-0000-000000000000", quantity: 0 },
+        { offerId: "off-nonexistent-another", quantity: 1 },
       ],
     };
     const data = (await postJSON("/validate", cart)) as {
