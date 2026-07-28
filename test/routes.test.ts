@@ -195,4 +195,82 @@ describe("routes", () => {
     expect(body).toHaveProperty("deliveryDays");
     expect(body).toHaveProperty("packageCount");
   });
+
+  it("GET /products with category filter returns 200 and filters correctly", async () => {
+    server = await buildServer();
+    const catRes = await server.inject({ method: "GET", url: "/categories" });
+    const categories = catRes.json();
+    const catId = categories[0].id;
+    const res = await server.inject({
+      method: "GET",
+      url: `/products?category=${catId}`,
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(Array.isArray(body)).toBe(true);
+    expect(body.length).toBeGreaterThan(0);
+    for (const p of body) {
+      expect(p.categoryId).toBe(catId);
+    }
+  });
+
+  it("GET /products with price range filter returns 200 and filters correctly", async () => {
+    server = await buildServer();
+    const res = await server.inject({
+      method: "GET",
+      url: "/products?minPrice=10000&maxPrice=50000",
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(Array.isArray(body)).toBe(true);
+    expect(body.length).toBeGreaterThan(0);
+    for (const p of body) {
+      const hasOfferInRange = p.variants.some((v: any) =>
+        v.offers.some((o: any) => o.price >= 10000 && o.price <= 50000),
+      );
+      expect(hasOfferInRange).toBe(true);
+    }
+  });
+
+  it("GET /products with combined filters returns 200 and matches all", async () => {
+    server = await buildServer();
+    const catRes = await server.inject({ method: "GET", url: "/categories" });
+    const categories = catRes.json();
+    const catId = categories[0].id;
+    const res = await server.inject({
+      method: "GET",
+      url: `/products?q=laptop&category=${catId}&minPrice=50000`,
+    });
+    expect(res.statusCode).toBe(200);
+    const body = res.json();
+    expect(Array.isArray(body)).toBe(true);
+    expect(body.length).toBeGreaterThan(0);
+    for (const p of body) {
+      expect(p.categoryId).toBe(catId);
+      const haystack = [p.name, p.description, p.brand ?? "", ...(p.tags ?? [])]
+        .join(" ")
+        .toLowerCase();
+      expect(haystack.includes("laptop")).toBe(true);
+      const hasOfferInRange = p.variants.some((v: any) =>
+        v.offers.some((o: any) => o.price >= 50000),
+      );
+      expect(hasOfferInRange).toBe(true);
+    }
+  });
+
+  it("POST /validate with invalid body returns 400", async () => {
+    server = await buildServer();
+    const res1 = await server.inject({
+      method: "POST",
+      url: "/validate",
+      body: {},
+    });
+    expect(res1.statusCode).toBe(400);
+    const res2 = await server.inject({
+      method: "POST",
+      url: "/validate",
+      body: { items: "not-array" },
+    });
+    expect(res2.statusCode).toBe(400);
+  });
 });

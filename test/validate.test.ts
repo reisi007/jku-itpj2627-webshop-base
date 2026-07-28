@@ -389,4 +389,69 @@ describe("validateCart", () => {
       result.issues.some((i) => i.code === "INVALID_QUANTITY"),
     ).toBe(true);
   });
+
+  it("empty cart: no items, no issues, no shipments", () => {
+    const result = validateCart({ items: [] }, dataset);
+    expect(result.valid).toBe(true);
+    expect(result.issues).toHaveLength(0);
+    expect(result.shipments).toHaveLength(0);
+    expect(result.deliveryDays).toBeNull();
+    expect(result.packageCount).toBe(0);
+    expect(result.totals.items).toBe(0);
+    expect(result.totals.shipping).toBe(0);
+    expect(result.totals.discount).toBe(0);
+    expect(result.totals.grand).toBe(0);
+  });
+
+  it("all items invalid: multiple OFFER_NOT_FOUND issues, no shipments", () => {
+    const result = validateCart({
+      items: [
+        { offerId: "fake1", quantity: 1 },
+        { offerId: "fake2", quantity: 1 },
+      ],
+    }, dataset);
+    expect(result.valid).toBe(false);
+    expect(result.issues).toHaveLength(2);
+    expect(result.issues[0].code).toBe("OFFER_NOT_FOUND");
+    expect(result.issues[1].code).toBe("OFFER_NOT_FOUND");
+    expect(result.shipments).toHaveLength(0);
+    expect(result.deliveryDays).toBeNull();
+    expect(result.packageCount).toBe(0);
+  });
+
+  it("voucher on empty cart: WELCOME10 valid with discount 0, MINORDER3000 min order not met", () => {
+    const resultWelcome = validateCart({
+      items: [],
+      voucherCode: "WELCOME10",
+    }, dataset);
+    expect(resultWelcome.valid).toBe(true);
+    expect(resultWelcome.totals.discount).toBe(0);
+    expect(resultWelcome.issues).toHaveLength(0);
+    const resultMinOrder = validateCart({
+      items: [],
+      voucherCode: "MINORDER3000",
+    }, dataset);
+    expect(resultMinOrder.valid).toBe(false);
+    expect(
+      resultMinOrder.issues.some((i) => i.code === "VOUCHER_MIN_ORDER_NOT_MET"),
+    ).toBe(true);
+    expect(resultMinOrder.totals.discount).toBe(0);
+  });
+
+  it("free shipping threshold not met: shippingCost > 0", () => {
+    const paid = findOfferWithFreeShipping();
+    expect(paid).not.toBeNull();
+    const qty = 1;
+    const subtotal = paid!.price * qty;
+    expect(subtotal).toBeLessThan(paid!.freeShippingThreshold!);
+    const result = validateCart({
+      items: [{ offerId: paid!.offerId, quantity: qty }],
+    }, dataset);
+    const shipment = result.shipments.find(
+      (s) => s.warehouseId === paid!.warehouseId && s.vendorId === paid!.vendorId,
+    );
+    expect(shipment).toBeDefined();
+    expect(shipment!.itemsSubtotal).toBeLessThan(paid!.freeShippingThreshold!);
+    expect(shipment!.shippingCost).toBeGreaterThan(0);
+  });
 });
