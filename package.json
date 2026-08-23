@@ -2,7 +2,10 @@
   "name": "webshop-backend",
   "version": "1.0.0",
   "type": "module",
-  "packageManager": "pnpm@10.0.0",
+  "packageManager": "pnpm@11.23.0",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "tsx watch src/index.ts",
     "start": "tsx src/index.ts",
