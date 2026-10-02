@@ -199,19 +199,16 @@ Campus Clothing, JKU Merchandise, Electronics & Gadgets, and Textbooks & Station
 
 ## Build agent authority
 
-The "build agent" orchestrates subagents and is explicitly permitted to read and
-update `Agents.md` (this file) and `Agents.todo.md` directly — e.g. to record
-decisions, adjust the contract, or track progress. Subagents must treat
-`Agents.md` as the binding contract and read it before working.
+The build/verify flow is **not** restated here — it lives in skill `build-verify`
+(agents-skills), with its always-on kernel in `.agents/rules/build-verify.md`:
+pull before changing, delegate implementation, verify in an independent subagent,
+commit after every round, push and watch CI. Follow that skill, not a local copy.
 
 ## Subagent authority
 
-- A subagent that validates (verifies) implementation work is allowed to spawn
-  sub-subagents of its own to fix issues found during verification, without
-  escalating back to the build agent. It must still report what was fixed.
-- **The validation agent must be a different subagent than the implementation agent.**
-  Never validate your own work. The build agent delegates implementation and
-  verification to separate, independent subagents.
+Implementation and verification go to **separate, independent subagents** — never
+validate your own work. The verifying subagent reports findings with
+`file:line` + severity; it does not fix them. Details: skill `build-verify`.
 
 ## Conventions
 
