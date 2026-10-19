@@ -4,7 +4,8 @@ Read-only webshop catalog backend for a student exercise at JKU Linz: students
 fill a shopping cart through an AI chat assistant that uses tool calling to query
 products and validate selections. The cart lives entirely in the frontend — this
 backend only serves catalog data and offers a stateless `POST /validate` endpoint
-to check cart contents, compute shipments, and apply voucher codes.
+to check cart contents, compute shipments, and apply voucher codes. There is no
+authentication and no image handling; the JSON dataset is portable and swappable.
 
 ## Quick Start
 
